@@ -706,6 +706,8 @@ libvlc_media_get_tracks_info( libvlc_media_t *p_md, libvlc_media_track_info_t **
         p_mes->i_codec = p_es->i_codec;
         p_mes->i_id = p_es->i_id;
 
+        p_mes->psz_language = p_es->psz_language != NULL ? strdup(p_es->psz_language) : NULL;
+
         p_mes->i_profile = p_es->i_profile;
         p_mes->i_level = p_es->i_level;
 
@@ -719,6 +721,7 @@ libvlc_media_get_tracks_info( libvlc_media_t *p_md, libvlc_media_track_info_t **
             p_mes->i_type = libvlc_track_video;
             p_mes->u.video.i_height = p_es->video.i_height;
             p_mes->u.video.i_width = p_es->video.i_width;
+            p_mes->u.video.f_frame_rate = p_es->video.i_frame_rate / (float) p_es->video.i_frame_rate_base;
             break;
         case AUDIO_ES:
             p_mes->i_type = libvlc_track_audio;
@@ -733,4 +736,16 @@ libvlc_media_get_tracks_info( libvlc_media_t *p_md, libvlc_media_track_info_t **
 
     vlc_mutex_unlock( &p_input_item->lock );
     return i_es;
+}
+
+/**************************************************************************
+ * Release media descriptor's elementary streams description array
+ **************************************************************************/
+void libvlc_media_tracks_info_release( libvlc_media_track_info_t *p_tracks, int i_count )
+{
+    if (!p_tracks)
+        return;
+    for (int i = 0; i < i_count; ++i)
+        free( p_tracks[i].psz_language );
+    free( p_tracks );
 }

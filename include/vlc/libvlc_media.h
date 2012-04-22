@@ -164,8 +164,11 @@ typedef struct libvlc_media_track_info_t
             /* Video specific */
             unsigned    i_height;
             unsigned    i_width;
+            float       f_frame_rate;
         } video;
     } u;
+
+    char *psz_language;
 
 } libvlc_media_track_info_t;
 
@@ -512,6 +515,17 @@ LIBVLC_API void *libvlc_media_get_user_data( libvlc_media_t *p_md );
 LIBVLC_API
 int libvlc_media_get_tracks_info( libvlc_media_t *p_md,
                                   libvlc_media_track_info_t **tracks );
+
+/**
+ * Release media descriptor's elementary streams description array
+ *
+ * \param p_tracks tracks info array to release
+ * \param i_count number of elements in the array
+ */
+LIBVLC_API
+void libvlc_media_tracks_info_release( libvlc_media_track_info_t *p_tracks,
+                                       int i_count );
+
 
 /** @}*/
 
