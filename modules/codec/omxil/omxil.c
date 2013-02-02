@@ -993,7 +993,7 @@ loaded:
         if (!strncmp(p_sys->ppsz_components[i], "OMX.PV.", 7))
             continue;
         /* The same sw codecs, renamed in ICS (perhaps also in honeycomb) */
-        if (!strncmp(p_sys->ppsz_components[i], "OMX.google.", 11))
+        if (strncmp(p_sys->ppsz_components[i], "OMX.google.", 11))
             continue;
         /* This one has been seen on HTC One V - it behaves like it works,
          * but FillBufferDone returns buffers filled with 0 bytes. The One V
