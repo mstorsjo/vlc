@@ -411,6 +411,8 @@ static OMX_ERRORTYPE SetPortDefinition(decoder_t *p_dec, OmxPort *p_port,
     /* Deal with audio params */
     if(p_fmt->i_cat == AUDIO_ES)
     {
+if (def->eDir == OMX_DirInput)
+def->format.audio.eEncoding = OMX_AUDIO_CodingVORBIS;
         omx_error = SetAudioParameters(p_port->omx_handle,
                                        &p_port->format_param, def->nPortIndex,
                                        def->format.audio.eEncoding,
