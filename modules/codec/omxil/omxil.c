@@ -47,6 +47,7 @@
 #include <vlc_block_helper.h>
 #include <vlc_cpu.h>
 #include "../h264_nal.h"
+#include "../../demux/xiph.h"
 
 #include "omxil.h"
 
@@ -1065,7 +1066,41 @@ loaded:
     CHECK_ERROR(omx_error, "Wait for Executing failed (%x)", omx_error );
 
     /* Send codec configuration data */
-    if( p_dec->fmt_in.i_extra )
+    if (p_dec->fmt_in.i_extra && p_dec->fmt_in.i_codec == VLC_CODEC_VORBIS)
+    {
+        unsigned pi_size[XIPH_MAX_HEADER_COUNT];
+        void    *pp_data[XIPH_MAX_HEADER_COUNT];
+        unsigned i_count, headers[] = { 0, 2 };
+        if (xiph_SplitHeaders(pi_size, pp_data, &i_count,
+                              p_dec->fmt_in.i_extra, p_dec->fmt_in.p_extra)) {
+            msg_Err(p_dec, "Unable to split vorbis extradata");
+            goto error;
+        }
+        if (i_count < 3) {
+            msg_Err(p_dec, "Not enough vorbis extradata");
+            for (unsigned i = 0; i < i_count; i++)
+                free(pp_data[i]);
+            goto error;
+        }
+        for (unsigned i = 0; i < 2; i++) {
+            OMX_FIFO_GET(&p_sys->in.fifo, p_header);
+            p_header->nFilledLen = pi_size[headers[i]];
+            if(p_header->nFilledLen > p_header->nAllocLen) {
+                msg_Dbg(p_dec, "buffer too small (%i,%i)", (int)p_header->nFilledLen,
+                        (int)p_header->nAllocLen);
+                p_header->nFilledLen = p_header->nAllocLen;
+            }
+            memcpy(p_header->pBuffer, pp_data[headers[i]], p_header->nFilledLen);
+            p_header->nOffset = 0;
+            p_header->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
+            msg_Dbg(p_dec, "sending codec config data %p, %p, %i", p_header,
+                    p_header->pBuffer, (int)p_header->nFilledLen);
+            OMX_EmptyThisBuffer(p_sys->omx_handle, p_header);
+        }
+        for (unsigned i = 0; i < i_count; i++)
+            free(pp_data[i]);
+    }
+    else if (p_dec->fmt_in.i_extra)
     {
         OMX_FIFO_GET(&p_sys->in.fifo, p_header);
         p_header->nFilledLen = p_dec->fmt_in.i_extra;
@@ -1556,6 +1591,14 @@ block_t *DecodeAudio ( decoder_t *p_dec, block_t **pp_block )
             }
             memcpy(p_header->pBuffer, p_block->p_buffer, p_header->nFilledLen );
             block_Release(p_block);
+        }
+        if (p_dec->fmt_in.i_codec == VLC_CODEC_VORBIS)
+        {
+            if (p_header->nFilledLen + 4 <= p_header->nAllocLen) {
+                int32_t pageSamples = -1;
+                memcpy(p_header->pBuffer + p_header->nFilledLen, &pageSamples, 4);
+                p_header->nFilledLen += 4;
+            }
         }
 
 #ifdef OMXIL_EXTRA_DEBUG

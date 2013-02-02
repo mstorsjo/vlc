@@ -329,6 +329,7 @@ static const struct
     { VLC_CODEC_MP4A,   OMX_AUDIO_CodingAAC, "audio_decoder.aac" },
     { VLC_CODEC_S16N,   OMX_AUDIO_CodingPCM, "audio_decoder.pcm" },
     { VLC_CODEC_MP3,    OMX_AUDIO_CodingMP3, "audio_decoder.mp3" },
+    { VLC_CODEC_VORBIS, OMX_AUDIO_CodingVORBIS, "audio_decoder.vorbis" },
     { 0, 0, 0 }
 };
 
