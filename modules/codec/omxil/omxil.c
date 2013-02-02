@@ -1114,6 +1114,24 @@ loaded:
             SetDWLE(&p_header->pBuffer[12], p_dec->fmt_in.video.i_height);
             SetDWLE(&p_header->pBuffer[16], p_dec->fmt_in.video.i_width);
         }
+        else if (p_sys->in.definition.format.audio.eEncoding == OMX_AUDIO_CodingWMA &&
+                 p_header->nAllocLen >= p_dec->fmt_in.i_extra + 18)
+        {
+            uint16_t tag = 0;
+            switch (p_dec->fmt_in.i_codec) {
+            case VLC_CODEC_WMA1: tag = 0x160; break;
+            case VLC_CODEC_WMA2: tag = 0x161; break;
+            }
+            p_header->nFilledLen = p_dec->fmt_in.i_extra + 18;
+            SetWLE(&p_header->pBuffer[0], tag);
+            SetWLE(&p_header->pBuffer[2], p_dec->fmt_in.audio.i_channels);
+            SetDWLE(&p_header->pBuffer[4], p_dec->fmt_in.audio.i_rate);
+            SetDWLE(&p_header->pBuffer[8], p_dec->fmt_in.i_bitrate * 8);
+            SetWLE(&p_header->pBuffer[12], p_dec->fmt_in.audio.i_blockalign);
+            SetWLE(&p_header->pBuffer[14], p_dec->fmt_in.audio.i_bitspersample);
+            SetWLE(&p_header->pBuffer[16], p_dec->fmt_in.i_extra);
+            memcpy(p_header->pBuffer + 18, p_dec->fmt_in.p_extra, p_dec->fmt_in.i_extra);
+        }
         else
         {
             if(p_header->nFilledLen > p_header->nAllocLen)
