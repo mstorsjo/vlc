@@ -1943,7 +1943,8 @@ static const struct
 
     { { VLC_CODEC_YUV_PACKED, 0 },             PACKED_FMT(2, 16) },
     { { VLC_CODEC_RGB8, VLC_CODEC_GREY,
-        VLC_CODEC_YUVP, VLC_CODEC_RGBP, 0 },   PACKED_FMT(1, 8) },
+        VLC_CODEC_YUVP, VLC_CODEC_RGBP,
+        VLC_CODEC_OPAQUE_VBUF, 0 },            PACKED_FMT(1, 8) },
 
     { { VLC_CODEC_RGB15, 0 },                  PACKED_FMT(2, 15) },
     { { VLC_CODEC_RGB12, 0 },                  PACKED_FMT(2, 12) },

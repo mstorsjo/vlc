@@ -47,6 +47,10 @@
 
 extern JavaVM *myVm;
 
+jobject jni_LockAndGetAndroidJavaSurface();
+void jni_UnlockAndroidSurface();
+void jni_SetAndroidSurfaceSizeEnv(JNIEnv *p_env, int width, int height, int sar_num, int sar_den);
+
 struct decoder_sys_t
 {
     jclass media_codec_list_class, media_codec_class, media_format_class;
@@ -75,6 +79,7 @@ struct decoder_sys_t
 
     int started;
     int decoded;
+    int shutting_down;
 };
 
 enum Types
@@ -332,7 +337,18 @@ static int OpenDecoder(vlc_object_t *p_this)
         (*env)->DeleteLocalRef(env, bytebuf);
     }
 
-    (*env)->CallVoidMethod(env, p_sys->codec, p_sys->configure, format, NULL, NULL, 0);
+    jobject surf = jni_LockAndGetAndroidJavaSurface();
+    for (int i = 0; i < 20; i++) {
+        if (surf)
+            break;
+        jni_UnlockAndroidSurface();
+        msg_Dbg(p_dec, "no surface yet, sleeping and waiting");
+        usleep(20*1000);
+        surf = jni_LockAndGetAndroidJavaSurface();
+    }
+    msg_Dbg(p_dec, "got surface %p", surf);
+    (*env)->CallVoidMethod(env, p_sys->codec, p_sys->configure, format, surf, NULL, 0);
+    jni_UnlockAndroidSurface();
     if ((*env)->ExceptionOccurred(env)) {
         msg_Warn(p_dec, "Exception occurred in MediaCodec.configure");
         (*env)->ExceptionClear(env);
@@ -372,6 +388,7 @@ static void CloseDecoder(vlc_object_t *p_this)
     if (!p_sys)
         return;
 
+    p_sys->shutting_down = 1;
     (*myVm)->AttachCurrentThread(myVm, &env, NULL);
     if (p_sys->input_buffers)
         (*env)->DeleteGlobalRef(env, p_sys->input_buffers);
@@ -391,6 +408,29 @@ static void CloseDecoder(vlc_object_t *p_this)
     free(p_sys);
 }
 
+static void DisplayBuffer(void* opaque, uint32_t index, int display)
+{
+    decoder_t *p_dec = opaque;
+    decoder_sys_t *p_sys = p_dec->p_sys;
+    JNIEnv *env = NULL;
+
+    if (p_sys->shutting_down)
+        return;
+    msg_Dbg(p_dec, "DisplayBuffer %d %d\n", index, display);
+    (*myVm)->AttachCurrentThread(myVm, &env, NULL);
+    (*env)->CallVoidMethod(env, p_sys->codec, p_sys->release_output_buffer, index, display);
+    jthrowable exception = (*env)->ExceptionOccurred(env);
+    if(exception != NULL) {
+        jclass illegalStateException = (*env)->FindClass(env, "java/lang/IllegalStateException");
+        if((*env)->IsInstanceOf(env, exception, illegalStateException)) {
+            msg_Err(p_dec, "Codec error (IllegalStateException) in MediaCodec.releaseOutputBuffer");
+            (*env)->ExceptionClear(env);
+            (*env)->DeleteLocalRef(env, illegalStateException);
+        }
+    }
+    (*myVm)->DetachCurrentThread(myVm);
+}
+
 static void GetOutput(decoder_t *p_dec, JNIEnv *env, picture_t **pp_pic, int loop)
 {
     decoder_sys_t *p_sys = p_dec->p_sys;
@@ -401,9 +441,16 @@ static void GetOutput(decoder_t *p_dec, JNIEnv *env, picture_t **pp_pic, int loo
             jobject buf = (*env)->GetObjectArrayElement(env, p_sys->output_buffers, index);
             jsize buf_size = (*env)->GetDirectBufferCapacity(env, buf);
             uint8_t *ptr = (*env)->GetDirectBufferAddress(env, buf);
-            if (!*pp_pic)
+            if (!*pp_pic) {
                 *pp_pic = decoder_NewPicture(p_dec);
+            } else {
+                picture_t *p_pic = *pp_pic;
+                uint32_t index = ((uint32_t*)p_pic->p[0].p_pixels)[1];
+                (*env)->CallVoidMethod(env, p_sys->codec, p_sys->release_output_buffer, index, false);
+                msg_Dbg(p_dec, "releasing old index %d", index);
+            }
             if (*pp_pic) {
+
                 picture_t *p_pic = *pp_pic;
                 int size = (*env)->GetIntField(env, p_sys->buffer_info, p_sys->size_field);
                 int offset = (*env)->GetIntField(env, p_sys->buffer_info, p_sys->offset_field);
@@ -413,12 +460,21 @@ static void GetOutput(decoder_t *p_dec, JNIEnv *env, picture_t **pp_pic, int loo
                 // the cropping, so the top/left cropping params should just be ignored.
                 unsigned int chroma_div;
                 p_pic->date = (*env)->GetLongField(env, p_sys->buffer_info, p_sys->pts_field);
+/*
                 GetVlcChromaSizes(p_dec->fmt_out.i_codec, p_dec->fmt_out.video.i_width,
                                   p_dec->fmt_out.video.i_height, NULL, NULL, &chroma_div);
                 CopyOmxPicture(p_sys->pixel_format, p_pic, p_sys->slice_height, p_sys->stride,
                                ptr, chroma_div);
+*/
+                ((void**)p_pic->p[0].p_pixels)[0] = p_dec;
+                ((uint32_t*)p_pic->p[0].p_pixels)[1] = index;
+                ((void**)p_pic->p[0].p_pixels)[2] = DisplayBuffer;
+                ((uint32_t*)p_pic->p[0].p_pixels)[3] = 0;
+                msg_Dbg(p_dec, "filled picture with buffer ref %d", index);
+            } else {
+                (*env)->CallVoidMethod(env, p_sys->codec, p_sys->release_output_buffer, index, false);
             }
-            (*env)->CallVoidMethod(env, p_sys->codec, p_sys->release_output_buffer, index, false);
+
             jthrowable exception = (*env)->ExceptionOccurred(env);
             if(exception != NULL) {
                 jclass illegalStateException = (*env)->FindClass(env, "java/lang/IllegalStateException");
@@ -448,6 +504,7 @@ static void GetOutput(decoder_t *p_dec, JNIEnv *env, picture_t **pp_pic, int loo
 
             int width           = GET_INTEGER(format, "width");
             int height          = GET_INTEGER(format, "height");
+            jni_SetAndroidSurfaceSizeEnv(env, width, height, 1, 1);
             p_sys->stride       = GET_INTEGER(format, "stride");
             p_sys->slice_height = GET_INTEGER(format, "slice-height");
             p_sys->pixel_format = GET_INTEGER(format, "color-format");
@@ -457,7 +514,8 @@ static void GetOutput(decoder_t *p_dec, JNIEnv *env, picture_t **pp_pic, int loo
             int crop_bottom     = GET_INTEGER(format, "crop-bottom");
 
             const char *name = "unknown";
-            GetVlcChromaFormat(p_sys->pixel_format, &p_dec->fmt_out.i_codec, &name);
+//            GetVlcChromaFormat(p_sys->pixel_format, &p_dec->fmt_out.i_codec, &name);
+            p_dec->fmt_out.i_codec = VLC_CODEC_OPAQUE_VBUF;
             msg_Dbg(p_dec, "output: %d %s, %dx%d stride %d %d, crop %d %d %d %d",
                     p_sys->pixel_format, name, width, height, p_sys->stride, p_sys->slice_height,
                     p_sys->crop_left, p_sys->crop_top, crop_right, crop_bottom);

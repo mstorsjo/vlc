@@ -1391,12 +1391,13 @@ static void DecoderPlayVideo( decoder_t *p_dec, picture_t *p_picture,
         bool b_reject;
 
         DecoderWaitUnblock( p_dec, &b_reject );
-
+/*
         if( p_owner->b_buffering && !p_owner->buffer.b_first )
         {
             vlc_mutex_unlock( &p_owner->lock );
             return;
         }
+*/
         bool b_buffering_first = p_owner->b_buffering;
 
         /* */
@@ -1415,8 +1416,8 @@ static void DecoderPlayVideo( decoder_t *p_dec, picture_t *p_picture,
         /* */
         if( b_buffering_first )
         {
-            assert( p_owner->buffer.b_first );
-            assert( !p_owner->buffer.i_count );
+//            assert( p_owner->buffer.b_first );
+//            assert( !p_owner->buffer.i_count );
             msg_Dbg( p_dec, "Received first picture" );
             p_owner->buffer.b_first = false;
             p_picture->b_force = true;

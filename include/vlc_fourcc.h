@@ -228,6 +228,8 @@
 /* 2 planes Y/VU 4:2:2 */
 #define VLC_CODEC_NV61            VLC_FOURCC('N','V','6','1')
 
+#define VLC_CODEC_OPAQUE_VBUF     VLC_FOURCC('O','P','A','Q')
+
 /* Image codec (video) */
 #define VLC_CODEC_PNG             VLC_FOURCC('p','n','g',' ')
 #define VLC_CODEC_PPM             VLC_FOURCC('p','p','m',' ')

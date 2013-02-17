@@ -113,6 +113,8 @@ struct vout_display_sys_t {
     /* density */
     int i_sar_num;
     int i_sar_den;
+
+    bool b_is_direct;
 };
 
 struct picture_sys_t {
@@ -160,6 +162,8 @@ static void *InitLibrary(vout_display_sys_t *sys)
     return NULL;
 }
 
+vout_display_t *g_vd;
+
 static int Open(vlc_object_t *p_this)
 {
     vout_display_t *vd = (vout_display_t *)p_this;
@@ -190,7 +194,13 @@ static int Open(vlc_object_t *p_this)
     video_format_t fmt = vd->fmt;
 
     char *psz_fcc = var_InheritString(vd, CFG_PREFIX "chroma");
-    if( psz_fcc ) {
+    int i_pictures = 1;
+    sys->b_is_direct = false;
+    if (fmt.i_chroma == VLC_CODEC_OPAQUE_VBUF) {
+        // Keep the opaque format
+        i_pictures = 31;
+        sys->b_is_direct = true;
+    } else if( psz_fcc ) {
         fmt.i_chroma = vlc_fourcc_GetCodecFromString(VIDEO_ES, psz_fcc);
         free(psz_fcc);
     } else
@@ -217,39 +227,45 @@ static int Open(vlc_object_t *p_this)
             break;
 
         default:
-            return VLC_EGENERIC;
+            break;
+//            return VLC_EGENERIC;
     }
     video_format_FixRgb(&fmt);
 
     msg_Dbg(vd, "Pixel format %4.4s", (char*)&fmt.i_chroma);
+    g_vd = vd;
 
     /* Create the associated picture */
+    picture_t** pictures[31];
+    for (int i = 0; i < i_pictures; i++) {
     picture_resource_t *rsc = &sys->resource;
     rsc->p_sys = malloc(sizeof(*rsc->p_sys));
     if (!rsc->p_sys)
         goto enomem;
     rsc->p_sys->sys = sys;
 
-    for (int i = 0; i < PICTURE_PLANE_MAX; i++) {
-        rsc->p[i].p_pixels = NULL;
-        rsc->p[i].i_pitch = 0;
-        rsc->p[i].i_lines = 0;
+    for (int j = 0; j < PICTURE_PLANE_MAX; j++) {
+        rsc->p[j].p_pixels = NULL;
+        rsc->p[j].i_pitch = 0;
+        rsc->p[j].i_lines = 0;
     }
     picture_t *picture = picture_NewFromResource(&fmt, rsc);
     if (!picture)
         goto enomem;
+    pictures[i] = picture;
+    }
 
     /* Wrap it into a picture pool */
     picture_pool_configuration_t pool_cfg;
     memset(&pool_cfg, 0, sizeof(pool_cfg));
-    pool_cfg.picture_count = 1;
-    pool_cfg.picture       = &picture;
+    pool_cfg.picture_count = i_pictures;
+    pool_cfg.picture       = pictures;
     pool_cfg.lock          = AndroidLockSurface;
     pool_cfg.unlock        = AndroidUnlockSurface;
 
     sys->pool = picture_pool_NewExtended(&pool_cfg);
     if (!sys->pool) {
-        picture_Release(picture);
+//        picture_Release(picture);
         goto enomem;
     }
 
@@ -271,7 +287,7 @@ static int Open(vlc_object_t *p_this)
     return VLC_SUCCESS;
 
 enomem:
-    free(rsc->p_sys);
+//    free(rsc->p_sys);
     dlclose(sys->p_library);
     free(sys);
     vlc_mutex_unlock(&single_instance);
@@ -332,6 +348,17 @@ static int  AndroidLockSurface(picture_t *picture)
     uint32_t sw, sh;
     void *surf;
 
+    if (sys->b_is_direct) {
+        if (!picture->p[0].p_pixels) {
+            picture->p[0].p_pixels = calloc(1, 50);
+//            msg_Dbg(g_vd, "Lock surface allocated %p", picture->p[0].p_pixels);
+        } else {
+//            msg_Dbg(g_vd, "Lock surface reused %p", picture->p[0].p_pixels);
+        }
+//        msg_Dbg(g_vd, "Lock surface refcount %d", picture->gc.refcount);
+        return VLC_SUCCESS;
+    }
+
     sw = picture->p[0].i_visible_pitch / picture->p[0].i_pixel_pitch;
     sh = picture->p[0].i_visible_lines;
 
@@ -375,6 +402,21 @@ static void AndroidUnlockSurface(picture_t *picture)
     picture_sys_t *picsys = picture->p_sys;
     vout_display_sys_t *sys = picsys->sys;
 
+    if (sys->b_is_direct) {
+        void *opaque = ((void**)picture->p[0].p_pixels)[0];
+        uint32_t index = ((uint32_t*)picture->p[0].p_pixels)[1];
+        void (*display_buffer)(void*,uint32_t,int) = ((void**)picture->p[0].p_pixels)[2];
+        int display = ((uint32_t*)picture->p[0].p_pixels)[3];
+        msg_Dbg(g_vd, "unlock surface %p, index %d display %d", picture->p[0].p_pixels, index, display);
+        if (display == 0 || display == 1) {
+//        msg_Dbg(g_vd, "calling display_buffer %p(%p, %d, %d)", display_buffer, opaque, index, display);
+        display_buffer(opaque, index, display);
+        } else {
+//        msg_Dbg(g_vd, "not calling display_buffer, already rendered");
+        }
+        return;
+    }
+
     if (likely(picsys->surf))
         sys->s_unlockAndPost(picsys->surf);
     jni_UnlockAndroidSurface();
@@ -382,8 +424,23 @@ static void AndroidUnlockSurface(picture_t *picture)
 
 static void Display(vout_display_t *vd, picture_t *picture, subpicture_t *subpicture)
 {
+    picture_sys_t *picsys = picture->p_sys;
+    vout_display_sys_t *sys = picsys->sys;
     VLC_UNUSED(vd);
     VLC_UNUSED(subpicture);
+
+    msg_Dbg(g_vd, "Display picture %p, refcount %d", picture, picture->gc.refcount);
+
+    if (sys->b_is_direct) {
+//        ((uint32_t*)picture->p[0].p_pixels)[3] = 1;
+
+        void *opaque = ((void**)picture->p[0].p_pixels)[0];
+        uint32_t index = ((uint32_t*)picture->p[0].p_pixels)[1];
+        void (*display_buffer)(void*,uint32_t,int) = ((void**)picture->p[0].p_pixels)[2];
+        if (!((uint32_t*)picture->p[0].p_pixels)[3])
+            display_buffer(opaque, index, 1);
+        ((uint32_t*)picture->p[0].p_pixels)[3] = 2;
+    }
 
     /* refcount lowers to 0, and pool_cfg.unlock is called */
 
