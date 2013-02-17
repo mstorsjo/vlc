@@ -373,6 +373,13 @@ static const struct
     { VLC_CODEC_MP4A,   OMX_AUDIO_CodingAAC, "audio_decoder.aac" },
     { VLC_CODEC_S16N,   OMX_AUDIO_CodingPCM, "audio_decoder.pcm" },
     { VLC_CODEC_MP3,    OMX_AUDIO_CodingMP3, "audio_decoder.mp3" },
+
+    /* The A52/AC3 decoder isn't standardized anywhere for OMX, so there's
+     * no OMX_AUDIO_Coding* enum to set, and no param struct to use in
+     * SetAudioParameters, but when setting a fake coding value and
+     * skipping setting any audio parameter struct, it works just fine
+     * with OMX.SEC.ac3.dec. */
+    { VLC_CODEC_A52,    OMX_AUDIO_CodingMP3, "audio_decoder.ac3" },
     { 0, 0, 0 }
 };
 
@@ -671,6 +678,9 @@ OMX_ERRORTYPE SetAudioParameters(OMX_HANDLETYPE handle,
     unsigned int i_bitrate, unsigned int i_bps, unsigned int i_blocksize)
 {
     OMX_INDEXTYPE index;
+
+    if (i_codec == VLC_CODEC_A52)
+        return OMX_ErrorNone;
 
     switch(encoding)
     {
