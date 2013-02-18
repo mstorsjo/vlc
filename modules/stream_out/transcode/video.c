@@ -176,6 +176,7 @@ int transcode_video_new( sout_stream_t *p_stream, sout_stream_id_t *id )
      * of the encoder here.
      */
 
+#if 0
     /* Initialization of encoder format structures */
     es_format_Init( &id->p_encoder->fmt_in, id->p_decoder->fmt_in.i_cat,
                     id->p_decoder->fmt_out.i_codec );
@@ -255,6 +256,7 @@ int transcode_video_new( sout_stream_t *p_stream, sout_stream_id_t *id )
             return VLC_EGENERIC;
         }
     }
+#endif
     return VLC_SUCCESS;
 }
 
@@ -706,7 +708,7 @@ int transcode_video_process( sout_stream_t *p_stream, sout_stream_id_t *id,
 
     if( unlikely( in == NULL ) )
     {
-        if( p_sys->i_threads == 0 )
+        if( 0 && p_sys->i_threads == 0 )
         {
             block_t *p_block;
             do {
@@ -727,6 +729,8 @@ int transcode_video_process( sout_stream_t *p_stream, sout_stream_id_t *id,
 
     while( (p_pic = id->p_decoder->pf_decode_video( id->p_decoder, &in )) )
     {
+        picture_Release( p_pic );
+        goto skip;
 
         if( p_stream->p_sout->i_out_pace_nocontrol && p_sys->b_hurry_up )
         {
@@ -863,6 +867,7 @@ int transcode_video_process( sout_stream_t *p_stream, sout_stream_id_t *id,
         }
     }
 
+skip:
     if( p_sys->i_threads >= 1 )
     {
         /* Pick up any return data the encoder thread wants to output. */
@@ -884,11 +889,13 @@ bool transcode_video_add( sout_stream_t *p_stream, es_format_t *p_fmt,
              "creating video transcoding from fcc=`%4.4s' to fcc=`%4.4s'",
              (char*)&p_fmt->i_codec, (char*)&p_sys->i_vcodec );
 
+#if 0
     /* Complete destination format */
     id->p_encoder->fmt_out.i_codec = p_sys->i_vcodec;
     id->p_encoder->fmt_out.video.i_width  = p_sys->i_width & ~1;
     id->p_encoder->fmt_out.video.i_height = p_sys->i_height & ~1;
     id->p_encoder->fmt_out.i_bitrate = p_sys->i_vbitrate;
+#endif
 
     /* Build decoder -> filter -> encoder chain */
     if( transcode_video_new( p_stream, id ) )
@@ -901,7 +908,7 @@ bool transcode_video_add( sout_stream_t *p_stream, es_format_t *p_fmt,
      * all the characteristics of the decoded stream yet */
     id->b_transcode = true;
 
-    if( p_sys->f_fps > 0 )
+    if( 0 && p_sys->f_fps > 0 )
     {
         id->p_encoder->fmt_out.video.i_frame_rate = (p_sys->f_fps * ENC_FRAMERATE_BASE);
         id->p_encoder->fmt_out.video.i_frame_rate_base = ENC_FRAMERATE_BASE;

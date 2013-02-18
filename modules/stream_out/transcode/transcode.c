@@ -471,6 +471,8 @@ static int Open( vlc_object_t *p_this )
     p_stream->pf_send   = Send;
     p_stream->p_sys     = p_sys;
 
+    p_sys->start = mdate();
+
     return VLC_SUCCESS;
 }
 
@@ -481,6 +483,8 @@ static void Close( vlc_object_t * p_this )
 {
     sout_stream_t       *p_stream = (sout_stream_t*)p_this;
     sout_stream_sys_t   *p_sys = p_stream->p_sys;
+
+    msg_Dbg(p_this, "Decoding took %"PRId64" ms", (mdate() - p_sys->start) / 1000);
 
     free( p_sys->psz_af );
 

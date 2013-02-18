@@ -91,6 +91,7 @@ int transcode_audio_new( sout_stream_t *p_stream,
      * Open encoder
      */
 
+#if 0
     /* Initialization of encoder format structures */
     es_format_Init( &id->p_encoder->fmt_in, id->p_decoder->fmt_in.i_cat,
                     id->p_decoder->fmt_out.i_codec );
@@ -148,6 +149,7 @@ int transcode_audio_new( sout_stream_t *p_stream,
         return VLC_EGENERIC;
     }
 
+#endif
     return VLC_SUCCESS;
 }
 
@@ -182,17 +184,20 @@ int transcode_audio_process( sout_stream_t *p_stream,
 
     if( unlikely( in == NULL ) )
     {
+/*
         block_t *p_block;
         do {
            p_block = id->p_encoder->pf_encode_audio(id->p_encoder, NULL );
            block_ChainAppend( out, p_block );
         } while( p_block );
+*/
         return VLC_SUCCESS;
     }
 
     while( (p_audio_buf = id->p_decoder->pf_decode_audio( id->p_decoder,
                                                           &in )) )
     {
+        goto skip;
         if( p_sys->b_master_sync )
         {
             mtime_t i_pts = date_Get( &id->interpolated_pts ) + 1;
@@ -223,6 +228,7 @@ int transcode_audio_process( sout_stream_t *p_stream,
         p_block = id->p_encoder->pf_encode_audio( id->p_encoder, p_audio_buf );
 
         block_ChainAppend( out, p_block );
+    skip:
         block_Release( p_audio_buf );
     }
 
@@ -238,6 +244,7 @@ bool transcode_audio_add( sout_stream_t *p_stream, es_format_t *p_fmt,
              "creating audio transcoding from fcc=`%4.4s' to fcc=`%4.4s'",
              (char*)&p_fmt->i_codec, (char*)&p_sys->i_acodec );
 
+#if 0
     /* Complete destination format */
     id->p_encoder->fmt_out.i_codec = p_sys->i_acodec;
     id->p_encoder->fmt_out.audio.i_rate = p_sys->i_sample_rate > 0 ?
@@ -256,6 +263,7 @@ bool transcode_audio_add( sout_stream_t *p_stream, es_format_t *p_fmt,
     id->p_encoder->fmt_out.audio.i_physical_channels =
             pi_channels_maps[id->p_encoder->fmt_out.audio.i_channels];
 
+#endif
     /* Build decoder -> filter -> encoder chain */
     if( transcode_audio_new( p_stream, id ) )
     {

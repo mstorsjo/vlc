@@ -15,6 +15,7 @@
 
 struct sout_stream_sys_t
 {
+    mtime_t start;
     sout_stream_id_t *id_video;
     block_t         *p_buffers;
     vlc_mutex_t     lock_out;
