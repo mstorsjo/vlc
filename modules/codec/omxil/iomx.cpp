@@ -28,6 +28,7 @@
 #include <media/IOMX.h>
 #include <binder/MemoryDealer.h>
 #include <OMX_Component.h>
+#include <gui/Surface.h>
 
 #define PREFIX(x) I ## x
 
@@ -68,14 +69,19 @@ public:
     OMX_CALLBACKTYPE callbacks;
     OMX_PTR app_data;
     OMX_STATETYPE state;
+    int out_port;
     List<OMX_BUFFERHEADERTYPE*> buffers;
+    List<OMX_BUFFERHEADERTYPE*> windowBuffers;
     OMX_HANDLETYPE handle;
     String8 component_name;
+    sp<ANativeWindow> window;
 };
 
 class OMXBuffer {
 public:
     sp<MemoryDealer> dealer;
+    sp<GraphicBuffer> graphicBuffer;
+    bool ownedByWindow;
     IOMX::buffer_id id;
 };
 
@@ -195,6 +201,15 @@ static int get_config_size(OMX_INDEXTYPE param_index)
 static OMX_ERRORTYPE iomx_send_command(OMX_HANDLETYPE component, OMX_COMMANDTYPE command, OMX_U32 param1, OMX_PTR)
 {
     OMXNode* node = (OMXNode*) ((OMX_COMPONENTTYPE*)component)->pComponentPrivate;
+    if ((command == OMX_CommandPortDisable && param1 == node->out_port) || (command == OMX_CommandStateSet && param1 == OMX_StateLoaded)) {
+        for( List<OMX_BUFFERHEADERTYPE*>::iterator it = node->windowBuffers.begin(); it != node->windowBuffers.end(); it++ ) {
+            OMX_BUFFERHEADERTYPE* buf = *it;
+            OMXBuffer* info = (OMXBuffer*) buf->pPlatformPrivate;
+            buf->nFilledLen = 0;
+            node->callbacks.FillBufferDone(node->handle, node->app_data, buf);
+        }
+        node->windowBuffers.clear();
+    }
     return get_error(ctx->iomx->sendCommand(node->node, command, param1));
 }
 
@@ -239,6 +254,11 @@ static OMX_ERRORTYPE iomx_free_buffer(OMX_HANDLETYPE component, OMX_U32 port, OM
 {
     OMXNode* node = (OMXNode*) ((OMX_COMPONENTTYPE*)component)->pComponentPrivate;
     OMXBuffer* info = (OMXBuffer*) buffer->pPlatformPrivate;
+    if (info->graphicBuffer.get() != NULL) {
+        ALOGW("FreeBuffer, graphicBuffer %p, ownedByWindow %d", info->graphicBuffer.get(), info->ownedByWindow);
+        if (!info->ownedByWindow)
+            node->window->cancelBuffer(node->window.get(), info->graphicBuffer.get());
+    }
     status_t ret = ctx->iomx->freeBuffer(node->node, port, info->id);
     for( List<OMX_BUFFERHEADERTYPE*>::iterator it = node->buffers.begin(); it != node->buffers.end(); it++ ) {
         if (buffer == *it) {
@@ -262,6 +282,11 @@ static OMX_ERRORTYPE iomx_fill_this_buffer(OMX_HANDLETYPE component, OMX_BUFFERH
 {
     OMXNode* node = (OMXNode*) ((OMX_COMPONENTTYPE*)component)->pComponentPrivate;
     OMXBuffer* info = (OMXBuffer*) buffer->pPlatformPrivate;
+    if (info->graphicBuffer.get() != NULL) {
+        int ret = node->window->lockBuffer(node->window.get(), info->graphicBuffer.get());
+        if (ret != OK)
+            return OMX_ErrorUndefined;
+    }
     return get_error(ctx->iomx->fillBuffer(node->node, info->id));
 }
 
@@ -426,5 +451,173 @@ OMX_ERRORTYPE PREFIX(OMX_GetComponentsOfRole)(OMX_STRING role, OMX_U32 *num_comp
     *num_comps = i;
     return OMX_ErrorNone;
 }
+OMX_ERRORTYPE IOMX_EnableGraphicBuffers(OMX_HANDLETYPE component, OMX_U32 index, void* surf)
+{
+    OMXNode* node = (OMXNode*) ((OMX_COMPONENTTYPE*)component)->pComponentPrivate;
+    sp<Surface> surface((Surface*)surf);
+    sp<ISurfaceTexture> surfaceTexture = surface->getSurfaceTexture();
+    node->window = new SurfaceTextureClient(surfaceTexture);
+    int err = native_window_api_connect(node->window.get(), NATIVE_WINDOW_API_MEDIA);
+    if (err != 0) {
+        ALOGE("api connect failed: %s (%d)", strerror(-err), -err);
+        return OMX_ErrorUndefined;
+    }
+    err = native_window_set_scaling_mode(node->window.get(), NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW);
+    if (err != 0) {
+        ALOGE("set scaling mode failed: %s (%d)", strerror(-err), -err);
+        return OMX_ErrorUndefined;
+    }
+    return get_error(ctx->iomx->enableGraphicBuffers(node->node, index, OMX_TRUE));
+}
+OMX_ERRORTYPE IOMX_InitWindowBuffers(OMX_HANDLETYPE component, OMX_U32 index, OMX_PARAM_PORTDEFINITIONTYPE* def, OMX_U32* window_buffers)
+{
+    OMXNode* node = (OMXNode*) ((OMX_COMPONENTTYPE*)component)->pComponentPrivate;
+    int err;
+    ALOGW("setting buffers geometry %d %d %d\n", def->format.video.nFrameWidth, def->format.video.nFrameHeight, def->format.video.eColorFormat);
+
+    err = native_window_set_buffers_geometry(
+            node->window.get(),
+            def->format.video.nFrameWidth,
+            def->format.video.nFrameHeight,
+            def->format.video.eColorFormat);
+    if (err != 0) {
+        ALOGE("set scaling mode failed: %s (%d)", strerror(-err), -err);
+        return OMX_ErrorUndefined;
+    }
+    OMX_U32 usage = 0;
+    err = ctx->iomx->getGraphicBufferUsage(node->node, index, &usage);
+    if (err != 0) {
+        ALOGE("get graphic buffer usage failed: %s (%d)", strerror(-err), -err);
+        return OMX_ErrorUndefined;
+    }
+    err = native_window_set_usage(
+            node->window.get(),
+            usage | GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_EXTERNAL_DISP);
+    if (err != 0) {
+        ALOGE("set window usage failed: %s (%d)", strerror(-err), -err);
+        return OMX_ErrorUndefined;
+    }
+    int minUndequeuedBufs = 0;
+    err = node->window->query(
+            node->window.get(), NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS,
+            &minUndequeuedBufs);
+    *window_buffers = minUndequeuedBufs;
+    ALOGW("min undequeued bufs %d, actual buffers %d min %d", minUndequeuedBufs, def->nBufferCountActual, def->nBufferCountMin);
+    if (def->nBufferCountActual < def->nBufferCountMin + minUndequeuedBufs) {
+        ALOGW("increasing buf count from %d to %d + %d", def->nBufferCountActual, def->nBufferCountMin, minUndequeuedBufs);
+        OMX_U32 newBufferCount = def->nBufferCountMin + minUndequeuedBufs;
+        def->nBufferCountActual = newBufferCount;
+        err = ctx->iomx->setParameter(
+                node->node, OMX_IndexParamPortDefinition, def, sizeof(*def));
+
+        if (err != OK) {
+            ALOGE("setting nBufferCountActual to %lu failed: %d",
+                    newBufferCount, err);
+            return get_error(err);
+        }
+    }
+
+    err = native_window_set_buffer_count(node->window.get(), def->nBufferCountActual);
+    return OMX_ErrorNone;
+}
+OMX_ERRORTYPE IOMX_SetCrop(OMX_HANDLETYPE component, int left, int top, int width, int height)
+{
+    OMXNode* node = (OMXNode*) ((OMX_COMPONENTTYPE*)component)->pComponentPrivate;
+    if (!node->window.get())
+        return OMX_ErrorNone;
+    ALOGW("setting crop %d %d %d %d\n", left, top, width, height);
+
+    android_native_rect_t crop;
+    crop.left = left;
+    crop.top = top;
+    crop.right = left + width;
+    crop.bottom = top + height;
+
+    int err = native_window_set_crop(node->window.get(), &crop);
+    if (err != 0) {
+        ALOGE("set crop failed: %s (%d)", strerror(-err), -err);
+        return OMX_ErrorUndefined;
+    }
+    return OMX_ErrorNone;
+}
+OMX_ERRORTYPE IOMX_UseBuffer(OMX_HANDLETYPE component, OMX_BUFFERHEADERTYPE **bufferptr, OMX_U32 port_index, OMX_PTR app_private)
+{
+    OMXNode* node = (OMXNode*) ((OMX_COMPONENTTYPE*)component)->pComponentPrivate;
+    node->out_port = port_index;
+    OMXBuffer* info = new OMXBuffer;
+    info->ownedByWindow = false;
+
+    ANativeWindowBuffer *buf;
+    int err = node->window->dequeueBuffer(node->window.get(), &buf);
+    if (err != 0) {
+        ALOGE("dequeueBuffer failed: %s (%d)", strerror(-err), -err);
+        return OMX_ErrorUndefined;
+    }
+    ALOGW("dequeueBuffer ok");
+
+    info->graphicBuffer = new GraphicBuffer(buf, false);
+    ALOGW("new GraphicBuffer %p", info->graphicBuffer.get());
+    int ret = ctx->iomx->useGraphicBuffer(node->node, port_index, info->graphicBuffer, &info->id);
+    ALOGW("useGraphicBuffer returned %d", ret);
+    if (ret != OK)
+        return OMX_ErrorUndefined;
+
+    OMX_BUFFERHEADERTYPE *buffer = (OMX_BUFFERHEADERTYPE*) calloc(1, sizeof(OMX_BUFFERHEADERTYPE));
+    *bufferptr = buffer;
+    buffer->pPlatformPrivate = info;
+    buffer->pAppPrivate = app_private;
+    buffer->nAllocLen = 0;
+    node->buffers.push_back(buffer);
+
+    return OMX_ErrorNone;
+}
+OMX_ERRORTYPE IOMX_CancelBuffer(OMX_HANDLETYPE component, OMX_BUFFERHEADERTYPE *buffer)
+{
+    OMXNode* node = (OMXNode*) ((OMX_COMPONENTTYPE*)component)->pComponentPrivate;
+    OMXBuffer* info = (OMXBuffer*) buffer->pPlatformPrivate;
+    info->ownedByWindow = true;
+    ALOGW("cancelBuffer %p", buffer);
+    int err = node->window->cancelBuffer(node->window.get(), info->graphicBuffer.get());
+    if (err != 0) {
+        ALOGE("cancelBuffer failed: %s (%d)", strerror(-err), -err);
+        return OMX_ErrorUndefined;
+    }
+    node->windowBuffers.push_back(buffer);
+    return OMX_ErrorNone;
+}
+OMX_ERRORTYPE IOMX_RenderBuffer(OMX_HANDLETYPE component, OMX_BUFFERHEADERTYPE *buffer)
+{
+    OMXNode* node = (OMXNode*) ((OMX_COMPONENTTYPE*)component)->pComponentPrivate;
+    OMXBuffer* info = (OMXBuffer*) buffer->pPlatformPrivate;
+    info->ownedByWindow = true;
+    int err = node->window->queueBuffer(node->window.get(), info->graphicBuffer.get());
+    node->windowBuffers.push_back(buffer);
+    if (err != 0) {
+        ALOGE("queueBuffer failed: %s (%d)", strerror(-err), -err);
+        return OMX_ErrorUndefined;
+    }
+
+    ANativeWindowBuffer *buf;
+    err = node->window->dequeueBuffer(node->window.get(), &buf);
+    if (err != 0) {
+        ALOGE("dequeueBuffer failed: %s (%d)", strerror(-err), -err);
+        return OMX_ErrorUndefined;
+    }
+    for( List<OMX_BUFFERHEADERTYPE*>::iterator it = node->windowBuffers.begin(); it != node->windowBuffers.end(); it++ ) {
+        OMXBuffer* info = (OMXBuffer*) (*it)->pPlatformPrivate;
+        if (buf->handle == info->graphicBuffer->handle) {
+            node->windowBuffers.erase(it);
+            info->ownedByWindow = false;
+            int ret = node->window->lockBuffer(node->window.get(), info->graphicBuffer.get());
+            if (ret != OK)
+                return OMX_ErrorUndefined;
+            return get_error(ctx->iomx->fillBuffer(node->node, info->id));
+        }
+    }
+    ALOGE("no matching window buffer found for buffer");
+    node->window->cancelBuffer(node->window.get(), buf);
+    return OMX_ErrorUndefined;
+}
+
 }
 
