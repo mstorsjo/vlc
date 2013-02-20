@@ -99,4 +99,10 @@ struct decoder_sys_t
     size_t i_nal_size_length; /* Length of the NAL size field for H264 */
     int b_use_pts;
 
+    vlc_mutex_t lock;
+
+    void *surf;
+    OMX_BUFFERHEADERTYPE *p_vout_buffers[20];
+    int i_vout_buffers;
+    bool b_shutting_down;
 };

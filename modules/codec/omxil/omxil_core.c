@@ -149,6 +149,12 @@ int InitOmxCore(vlc_object_t *p_this)
     pf_free_handle = dlsym( dll_handle, "OMX_FreeHandle" );
     pf_component_enum = dlsym( dll_handle, "OMX_ComponentNameEnum" );
     pf_get_roles_of_component = dlsym( dll_handle, "OMX_GetRolesOfComponent" );
+    pf_IOMX_EnableGraphicBuffers = dlsym(dll_handle, "OMX_EnableGraphicBuffers");
+    pf_IOMX_InitWindowBuffers = dlsym(dll_handle, "OMX_InitWindowBuffers");
+    pf_IOMX_SetCrop = dlsym(dll_handle, "OMX_SetCrop");
+    pf_IOMX_UseBuffer = dlsym(dll_handle, "OMX_UseBuffer");
+    pf_IOMX_CancelBuffer = dlsym(dll_handle, "OMX_CancelBuffer");
+    pf_IOMX_RenderBuffer = dlsym(dll_handle, "OMX_RenderBuffer");
     if( !pf_init || !pf_deinit || !pf_get_handle || !pf_free_handle ||
         !pf_component_enum || !pf_get_roles_of_component )
     {

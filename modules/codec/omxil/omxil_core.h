@@ -32,6 +32,12 @@ OMX_ERRORTYPE (*pf_get_handle) (OMX_HANDLETYPE *, OMX_STRING,
 OMX_ERRORTYPE (*pf_free_handle) (OMX_HANDLETYPE);
 OMX_ERRORTYPE (*pf_component_enum)(OMX_STRING, OMX_U32, OMX_U32);
 OMX_ERRORTYPE (*pf_get_roles_of_component)(OMX_STRING, OMX_U32 *, OMX_U8 **);
+OMX_ERRORTYPE (*pf_IOMX_EnableGraphicBuffers)(OMX_HANDLETYPE, OMX_U32, void*);
+OMX_ERRORTYPE (*pf_IOMX_InitWindowBuffers)(OMX_HANDLETYPE, OMX_U32, OMX_PARAM_PORTDEFINITIONTYPE*, OMX_U32*);
+OMX_ERRORTYPE (*pf_IOMX_SetCrop)(OMX_HANDLETYPE component, int, int, int, int);
+OMX_ERRORTYPE (*pf_IOMX_UseBuffer)(OMX_HANDLETYPE, OMX_BUFFERHEADERTYPE**, OMX_U32, OMX_PTR);
+OMX_ERRORTYPE (*pf_IOMX_CancelBuffer)(OMX_HANDLETYPE component, OMX_BUFFERHEADERTYPE *buffer);
+OMX_ERRORTYPE (*pf_IOMX_RenderBuffer)(OMX_HANDLETYPE component, OMX_BUFFERHEADERTYPE *buffer);
 
 int InitOmxCore(vlc_object_t *p_this);
 void DeinitOmxCore(void);
