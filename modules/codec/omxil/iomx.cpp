@@ -473,13 +473,24 @@ OMX_ERRORTYPE IOMX_InitWindowBuffers(OMX_HANDLETYPE component, OMX_U32 index, OM
 {
     OMXNode* node = (OMXNode*) ((OMX_COMPONENTTYPE*)component)->pComponentPrivate;
     int err;
-    ALOGW("setting buffers geometry %d %d %d\n", def->format.video.nFrameWidth, def->format.video.nFrameHeight, def->format.video.eColorFormat);
+    int colorFormat = def->format.video.eColorFormat;
 
+    if (!strncmp(node->component_name.string(), "OMX.SEC.", 8)) {
+        switch (colorFormat) {
+        case OMX_COLOR_FormatYUV420SemiPlanar:
+            colorFormat = 0x105; // HAL_PIXEL_FORMAT_YCbCr_420_SP
+            break;
+        case OMX_COLOR_FormatYUV420Planar:
+            colorFormat = 0x101; // HAL_PIXEL_FORMAT_YCbCr_420_P
+            break;
+        }
+    }
+    ALOGW("setting buffers geometry %d %d %d", def->format.video.nFrameWidth, def->format.video.nFrameHeight, colorFormat);
     err = native_window_set_buffers_geometry(
             node->window.get(),
             def->format.video.nFrameWidth,
             def->format.video.nFrameHeight,
-            def->format.video.eColorFormat);
+            colorFormat);
     if (err != 0) {
         ALOGE("set scaling mode failed: %s (%d)", strerror(-err), -err);
         return OMX_ErrorUndefined;
@@ -503,6 +514,7 @@ OMX_ERRORTYPE IOMX_InitWindowBuffers(OMX_HANDLETYPE component, OMX_U32 index, OM
             &minUndequeuedBufs);
     *window_buffers = minUndequeuedBufs;
     ALOGW("min undequeued bufs %d, actual buffers %d min %d", minUndequeuedBufs, def->nBufferCountActual, def->nBufferCountMin);
+    minUndequeuedBufs = 10; // increase the number of bugs, for SGS3
     if (def->nBufferCountActual < def->nBufferCountMin + minUndequeuedBufs) {
         ALOGW("increasing buf count from %d to %d + %d", def->nBufferCountActual, def->nBufferCountMin, minUndequeuedBufs);
         OMX_U32 newBufferCount = def->nBufferCountMin + minUndequeuedBufs;
