@@ -107,6 +107,7 @@ struct aout_sys_t
     int                             next_buf;
 
     int                             rate;
+    int                             channels;
 
     /* if we can measure latency already */
     bool                            started;
@@ -142,9 +143,9 @@ vlc_module_end ()
  *
  *****************************************************************************/
 
-static inline int bytesPerSample(void)
+static inline int bytesPerSample(aout_sys_t *sys)
 {
-    return 2 /* S16 */ * 2 /* stereo */;
+    return 2 /* S16 */ * sys->channels;
 }
 
 static int TimeGet(audio_output_t* aout, mtime_t* restrict drift)
@@ -239,7 +240,7 @@ static void Pause(audio_output_t *aout, bool pause, mtime_t date)
 static int WriteBuffer(audio_output_t *aout)
 {
     aout_sys_t *sys = aout->sys;
-    const size_t unit_size = sys->samples_per_buf * bytesPerSample();
+    const size_t unit_size = sys->samples_per_buf * bytesPerSample(sys);
 
     block_t *b = sys->p_buffer_chain;
     if (!b)
@@ -325,7 +326,7 @@ static void Play(audio_output_t *aout, block_t *p_buffer)
     p_buffer->p_next = NULL; /* Make sur our linked list doesn't use old references */
     vlc_mutex_lock(&sys->lock);
 
-    sys->samples += p_buffer->i_buffer / bytesPerSample();
+    sys->samples += p_buffer->i_buffer / bytesPerSample(sys);
 
     /* Hold this block until we can write it into the OpenSL buffer */
     block_ChainLastAppend(&sys->pp_buffer_last, p_buffer);
@@ -366,12 +367,26 @@ static int Start(audio_output_t *aout, audio_sample_format_t *restrict fmt)
 
     SLDataFormat_PCM format_pcm;
     format_pcm.formatType       = SL_DATAFORMAT_PCM;
-    format_pcm.numChannels      = 2;
     format_pcm.samplesPerSec    = ((SLuint32) fmt->i_rate * 1000) ;
     format_pcm.bitsPerSample    = SL_PCMSAMPLEFORMAT_FIXED_16;
     format_pcm.containerSize    = SL_PCMSAMPLEFORMAT_FIXED_16;
-    format_pcm.channelMask      = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
     format_pcm.endianness       = SL_BYTEORDER_LITTLEENDIAN;
+
+    fmt->i_original_channels = fmt->i_physical_channels;
+    switch(aout_FormatNbChannels(fmt))
+    {
+    case 1:
+        format_pcm.numChannels   = 1;
+        format_pcm.channelMask   = SL_SPEAKER_FRONT_CENTER;
+        fmt->i_physical_channels = AOUT_CHAN_CENTER;
+        break;
+    case 2:
+    default:
+        format_pcm.numChannels   = 2;
+        format_pcm.channelMask   = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+        fmt->i_physical_channels = AOUT_CHANS_STEREO;
+        break;
+    }
 
     SLDataSource audioSrc = {&loc_bufq, &format_pcm};
 
@@ -421,8 +436,9 @@ static int Start(audio_output_t *aout, audio_sample_format_t *restrict fmt)
 
     /* XXX: rounding shouldn't affect us at normal sampling rate */
     sys->rate = fmt->i_rate;
+    sys->channels = format_pcm.numChannels;
     sys->samples_per_buf = OPENSLES_BUFLEN * fmt->i_rate / 1000;
-    sys->buf = malloc(OPENSLES_BUFFERS * sys->samples_per_buf * bytesPerSample());
+    sys->buf = malloc(OPENSLES_BUFFERS * sys->samples_per_buf * bytesPerSample(sys));
     if (!sys->buf)
         goto error;
 
@@ -435,7 +451,6 @@ static int Start(audio_output_t *aout, audio_sample_format_t *restrict fmt)
 
     // we want 16bit signed data native endian.
     fmt->i_format              = VLC_CODEC_S16N;
-    fmt->i_physical_channels   = AOUT_CHAN_LEFT | AOUT_CHAN_RIGHT;
 
     SetPositionUpdatePeriod(sys->playerPlay, AOUT_MIN_PREPARE_TIME * 1000 / CLOCK_FREQ);
 
