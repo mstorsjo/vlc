@@ -83,6 +83,7 @@
 #define AOUT_VAR_CHAN_LEFT          3
 #define AOUT_VAR_CHAN_RIGHT         4
 #define AOUT_VAR_CHAN_DOLBYS        5
+#define AOUT_VAR_CHAN_MONO          6
 
 /*****************************************************************************
  * Main audio output structures

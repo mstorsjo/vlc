@@ -362,12 +362,6 @@ int aout_OutputNew (audio_output_t *aout, audio_sample_format_t *restrict fmt)
         aout_FormatPrepare (fmt);
     }
 
-    if (aout->start (aout, fmt))
-    {
-        msg_Err (aout, "module not functional");
-        return -1;
-    }
-
     if (!var_Type (aout, "stereo-mode"))
     {
         var_Create (aout, "stereo-mode",
@@ -376,6 +370,15 @@ int aout_OutputNew (audio_output_t *aout, audio_sample_format_t *restrict fmt)
         vlc_value_t txt;
         txt.psz_string = _("Stereo audio mode");
         var_Change (aout, "stereo-mode", VLC_VAR_SETTEXT, &txt, NULL);
+    }
+
+    if (var_GetInteger (aout, "stereo-mode") == AOUT_VAR_CHAN_MONO)
+        fmt->i_original_channels = fmt->i_physical_channels = AOUT_CHAN_CENTER;
+
+    if (aout->start (aout, fmt))
+    {
+        msg_Err (aout, "module not functional");
+        return -1;
     }
 
     /* The user may have selected a different channels configuration. */
@@ -396,6 +399,8 @@ int aout_OutputNew (audio_output_t *aout, audio_sample_format_t *restrict fmt)
             break;
         case AOUT_VAR_CHAN_DOLBYS:
             fmt->i_original_channels = AOUT_CHANS_STEREO|AOUT_CHAN_DOLBYSTEREO;
+            break;
+        case AOUT_VAR_CHAN_MONO:
             break;
         default:
         {
@@ -431,6 +436,9 @@ int aout_OutputNew (audio_output_t *aout, audio_sample_format_t *restrict fmt)
             var_Change (aout, "stereo-mode", VLC_VAR_ADDCHOICE, &val, &txt);
             val.i_int = AOUT_VAR_CHAN_RSTEREO;
             txt.psz_string = _("Reverse stereo");
+            var_Change (aout, "stereo-mode", VLC_VAR_ADDCHOICE, &val, &txt);
+            val.i_int = AOUT_VAR_CHAN_MONO;
+            txt.psz_string = _("Mono");
             var_Change (aout, "stereo-mode", VLC_VAR_ADDCHOICE, &val, &txt);
         }
     }
