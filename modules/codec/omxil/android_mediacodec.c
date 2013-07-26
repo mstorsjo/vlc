@@ -421,16 +421,12 @@ static void GetOutput(decoder_t *p_dec, JNIEnv *env, picture_t **pp_pic, int loo
                 picture_t *p_pic = *pp_pic;
                 int size = (*env)->GetIntField(env, p_sys->buffer_info, p_sys->size_field);
                 int offset = (*env)->GetIntField(env, p_sys->buffer_info, p_sys->offset_field);
-                ptr += offset; // Check the size parameter as well
-                // TODO: Use crop_top/crop_left as well? Or is that already taken into account?
-                // On OMX_TI_COLOR_FormatYUV420PackedSemiPlanar the offset already incldues
-                // the cropping, so the top/left cropping params should just be ignored.
                 unsigned int chroma_div;
                 p_pic->date = (*env)->GetLongField(env, p_sys->buffer_info, p_sys->pts_field);
                 GetVlcChromaSizes(p_dec->fmt_out.i_codec, p_dec->fmt_out.video.i_width,
                                   p_dec->fmt_out.video.i_height, NULL, NULL, &chroma_div);
                 CopyOmxPicture(p_sys->pixel_format, p_pic, p_sys->slice_height, p_sys->stride,
-                               ptr, chroma_div);
+                               ptr, chroma_div, p_sys->crop_left, p_sys->crop_top);
             }
             (*env)->CallVoidMethod(env, p_sys->codec, p_sys->release_output_buffer, index, false);
             jthrowable exception = (*env)->ExceptionOccurred(env);
@@ -484,14 +480,6 @@ static void GetOutput(decoder_t *p_dec, JNIEnv *env, picture_t **pp_pic, int loo
                 p_sys->slice_height = height;
             if ((*env)->ExceptionOccurred(env))
                 (*env)->ExceptionClear(env);
-            if (p_sys->pixel_format == OMX_TI_COLOR_FormatYUV420PackedSemiPlanar) {
-                p_sys->slice_height -= p_sys->crop_top/2;
-                /* Reset crop top/left here, since the offset parameter already includes this.
-                 * If we'd ignore the offset parameter in the BufferInfo, we could just keep
-                 * the original slice height and apply the top/left cropping instead. */
-                p_sys->crop_top = 0;
-                p_sys->crop_left = 0;
-            }
             if (IgnoreOmxDecoderPadding(p_sys->name)) {
                 p_sys->slice_height = 0;
                 p_sys->stride = p_dec->fmt_out.video.i_width;

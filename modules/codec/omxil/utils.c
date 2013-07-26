@@ -165,7 +165,8 @@ void PrintOmxEvent(vlc_object_t *p_this, OMX_EVENTTYPE event, OMX_U32 data_1,
  *****************************************************************************/
 void CopyOmxPicture( int i_color_format, picture_t *p_pic,
                      int i_slice_height,
-                     int i_src_stride, uint8_t *p_src, int i_chroma_div )
+                     int i_src_stride, uint8_t *p_src, int i_chroma_div,
+                     int i_offset_left, int i_offset_top )
 {
     uint8_t *p_dst;
     int i_dst_stride;
@@ -176,26 +177,31 @@ void CopyOmxPicture( int i_color_format, picture_t *p_pic,
         return;
     }
 
+    if( i_slice_height < p_pic->p[0].i_visible_lines )
+        i_slice_height = p_pic->p[0].i_visible_lines;
+
     for( i_plane = 0; i_plane < p_pic->i_planes; i_plane++ )
     {
-        if(i_plane == 1) i_src_stride /= i_chroma_div;
+        if(i_plane == 1) {
+            i_src_stride /= i_chroma_div;
+            i_offset_left /= i_chroma_div;
+            /* The handling of chroma planes currently assumes vertically
+             * subsampled chroma, e.g. 422 planar wouldn't work right. */
+            i_slice_height /= 2;
+            i_offset_top /= 2;
+        }
         p_dst = p_pic->p[i_plane].p_pixels;
         i_dst_stride = p_pic->p[i_plane].i_pitch;
         i_width = p_pic->p[i_plane].i_visible_pitch;
 
+        uint8_t *p_line_src = p_src + i_offset_left + i_offset_top * i_src_stride;
         for( i_line = 0; i_line < p_pic->p[i_plane].i_visible_lines; i_line++ )
         {
-            memcpy( p_dst, p_src, i_width );
-            p_src += i_src_stride;
+            memcpy( p_dst, p_line_src, i_width );
+            p_line_src += i_src_stride;
             p_dst += i_dst_stride;
         }
-        /* Handle plane height, which may be indicated via nSliceHeight in OMX.
-         * The handling for chroma planes currently assumes vertically
-         * subsampled chroma, e.g. 422 planar wouldn't work right. */
-        if( i_plane == 0 && i_slice_height > p_pic->p[i_plane].i_visible_lines )
-            p_src += i_src_stride * (i_slice_height - p_pic->p[i_plane].i_visible_lines);
-        else if ( i_plane > 0 && i_slice_height/2 > p_pic->p[i_plane].i_visible_lines )
-            p_src += i_src_stride * (i_slice_height/2 - p_pic->p[i_plane].i_visible_lines);
+        p_src += i_src_stride * i_slice_height;
     }
 }
 

@@ -391,7 +391,6 @@ static OMX_ERRORTYPE GetPortDefinition(decoder_t *p_dec, OmxPort *p_port,
     decoder_sys_t *p_sys = p_dec->p_sys;
     OMX_PARAM_PORTDEFINITIONTYPE *def = &p_port->definition;
     OMX_ERRORTYPE omx_error;
-    OMX_CONFIG_RECTTYPE crop_rect;
 
     omx_error = OMX_GetParameter(p_port->omx_handle,
                                  OMX_IndexParamPortDefinition, def);
@@ -408,21 +407,19 @@ static OMX_ERRORTYPE GetPortDefinition(decoder_t *p_dec, OmxPort *p_port,
         p_fmt->video.i_frame_rate = p_dec->fmt_in.video.i_frame_rate;
         p_fmt->video.i_frame_rate_base = p_dec->fmt_in.video.i_frame_rate_base;
 
-        OMX_INIT_STRUCTURE(crop_rect);
-        crop_rect.nPortIndex = def->nPortIndex;
-        omx_error = OMX_GetConfig(p_port->omx_handle, OMX_IndexConfigCommonOutputCrop, &crop_rect);
+        OMX_INIT_STRUCTURE(p_port->crop_rect);
+        p_port->crop_rect.nPortIndex = def->nPortIndex;
+        omx_error = OMX_GetConfig(p_port->omx_handle, OMX_IndexConfigCommonOutputCrop, &p_port->crop_rect);
         if (omx_error == OMX_ErrorNone)
         {
             if (!def->format.video.nSliceHeight)
                 def->format.video.nSliceHeight = def->format.video.nFrameHeight;
             if (!def->format.video.nStride)
                 def->format.video.nStride = def->format.video.nFrameWidth;
-            p_fmt->video.i_width = crop_rect.nWidth;
-            p_fmt->video.i_visible_width = crop_rect.nWidth;
-            p_fmt->video.i_height = crop_rect.nHeight;
-            p_fmt->video.i_visible_height = crop_rect.nHeight;
-            if (def->format.video.eColorFormat == OMX_TI_COLOR_FormatYUV420PackedSemiPlanar)
-                def->format.video.nSliceHeight -= crop_rect.nTop/2;
+            p_fmt->video.i_width = p_port->crop_rect.nWidth;
+            p_fmt->video.i_visible_width = p_port->crop_rect.nWidth;
+            p_fmt->video.i_height = p_port->crop_rect.nHeight;
+            p_fmt->video.i_visible_height = p_port->crop_rect.nHeight;
         }
         else
         {
@@ -1262,6 +1259,11 @@ static picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
             p_pic = p_header->pAppPrivate;
             if(!p_pic)
             {
+                uint8_t *ptr = p_header->pBuffer + p_header->nOffset;
+                if (p_sys->out.definition.format.video.eColorFormat ==
+                    OMX_TI_COLOR_FormatYUV420PackedSemiPlanar)
+                    ptr = p_header->pBuffer;
+
                 /* We're not in direct rendering mode.
                  * Get a new picture and copy the content */
                 p_pic = decoder_NewPicture( p_dec );
@@ -1270,8 +1272,9 @@ static picture_t *DecodeVideo( decoder_t *p_dec, block_t **pp_block )
                     CopyOmxPicture(p_sys->out.definition.format.video.eColorFormat,
                                    p_pic, p_sys->out.definition.format.video.nSliceHeight,
                                    p_sys->out.i_frame_stride,
-                                   p_header->pBuffer + p_header->nOffset,
-                                   p_sys->out.i_frame_stride_chroma_div);
+                                   ptr,
+                                   p_sys->out.i_frame_stride_chroma_div,
+                                   p_sys->out.crop_rect.nLeft, p_sys->out.crop_rect.nTop);
             }
 
             if (p_pic)

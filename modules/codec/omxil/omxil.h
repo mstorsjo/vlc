@@ -45,6 +45,7 @@ typedef struct OmxPort
     OMX_U32 i_port_index;
     OMX_HANDLETYPE omx_handle;
     OMX_PARAM_PORTDEFINITIONTYPE definition;
+    OMX_CONFIG_RECTTYPE crop_rect;
     es_format_t *p_fmt;
 
     unsigned int i_frame_size;

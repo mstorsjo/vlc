@@ -182,7 +182,8 @@ void PrintOmxEvent(vlc_object_t *p_this, OMX_EVENTTYPE event, OMX_U32 data_1,
  *****************************************************************************/
 void CopyOmxPicture( int i_color_format, picture_t *p_pic,
                      int i_slice_height,
-                     int i_src_stride, uint8_t *p_src, int i_chroma_div );
+                     int i_src_stride, uint8_t *p_src, int i_chroma_div,
+                     int i_offset_left, int i_offset_top );
 
 void CopyVlcPicture( decoder_t *, OMX_BUFFERHEADERTYPE *, picture_t * );
 
