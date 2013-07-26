@@ -146,7 +146,15 @@ static const struct member members[] = {
     { NULL, NULL, NULL, 0, 0 },
 };
 
-#define GET_INTEGER(obj, name) (*env)->CallIntMethod(env, obj, p_sys->get_integer, (*env)->NewStringUTF(env, name))
+static int get_integer(struct decoder_sys_t *p_sys, JNIEnv *env, jobject obj, const char *name)
+{
+    int value = (*env)->CallIntMethod(env, obj, p_sys->get_integer, (*env)->NewStringUTF(env, name));
+    if ((*env)->ExceptionOccurred(env)) {
+        (*env)->ExceptionClear(env);
+        return 0;
+    }
+    return value;
+}
 
 /*****************************************************************************
  * Local prototypes
@@ -452,15 +460,15 @@ static void GetOutput(decoder_t *p_dec, JNIEnv *env, picture_t **pp_pic, int loo
             msg_Dbg(p_dec, "output format changed: %.*s", format_len, format_ptr);
             (*env)->ReleaseStringUTFChars(env, format_string, format_ptr);
 
-            int width           = GET_INTEGER(format, "width");
-            int height          = GET_INTEGER(format, "height");
-            p_sys->stride       = GET_INTEGER(format, "stride");
-            p_sys->slice_height = GET_INTEGER(format, "slice-height");
-            p_sys->pixel_format = GET_INTEGER(format, "color-format");
-            p_sys->crop_left    = GET_INTEGER(format, "crop-left");
-            p_sys->crop_top     = GET_INTEGER(format, "crop-top");
-            int crop_right      = GET_INTEGER(format, "crop-right");
-            int crop_bottom     = GET_INTEGER(format, "crop-bottom");
+            int width           = get_integer(p_sys, env, format, "width");
+            int height          = get_integer(p_sys, env, format, "height");
+            p_sys->stride       = get_integer(p_sys, env, format, "stride");
+            p_sys->slice_height = get_integer(p_sys, env, format, "slice-height");
+            p_sys->pixel_format = get_integer(p_sys, env, format, "color-format");
+            p_sys->crop_left    = get_integer(p_sys, env, format, "crop-left");
+            p_sys->crop_top     = get_integer(p_sys, env, format, "crop-top");
+            int crop_right      = get_integer(p_sys, env, format, "crop-right");
+            int crop_bottom     = get_integer(p_sys, env, format, "crop-bottom");
 
             const char *name = "unknown";
             GetVlcChromaFormat(p_sys->pixel_format, &p_dec->fmt_out.i_codec, &name);
