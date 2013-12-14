@@ -712,6 +712,10 @@ static picture_t *DecodeVideo(decoder_t *p_dec, block_t **pp_block)
                 return p_pic;
             }
             timeout = 30;
+            if (!vlc_object_alive(p_dec)) {
+                (*myVm)->DetachCurrentThread(myVm);
+                return NULL;
+            }
             continue;
         }
         jobject buf = (*env)->GetObjectArrayElement(env, p_sys->input_buffers, index);
