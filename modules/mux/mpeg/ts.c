@@ -910,6 +910,10 @@ static int AddStream( sout_mux_t *p_mux, sout_input_t *p_input )
         p_stream->i_stream_type = 0x1b;
         p_stream->i_stream_id = 0xe0;
         break;
+    case VLC_CODEC_HEVC:
+        p_stream->i_stream_type = 0x24;
+        p_stream->i_stream_id = 0xe0;
+        break;
     /* XXX dirty dirty but somebody want crapy MS-codec XXX */
     case VLC_CODEC_H263I:
     case VLC_CODEC_H263:
