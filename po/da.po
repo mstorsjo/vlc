@@ -5,7 +5,6 @@
 # Translators:
 # nrbbi <nrbbiyoutube@gmail.com>, 2013
 # Aputsiaĸ Niels Janussen <aj@isit.gl>, 2013-2014
-# bbuullll33rr <madsrbojesen@gmail.com>, 2013
 # DeNelo <niels.f@noee.dk>, 2013-2014
 # Peter Jespersen <flywheeldk@gmail.com>, 2013
 # Sejani, 2013
