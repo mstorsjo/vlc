@@ -159,7 +159,7 @@ libdshow_plugin_la_SOURCES = access/dshow/vlc_dshow.h access/dshow/dshow.cpp acc
 	access/dshow/filter.cpp access/dshow/filter.h access/dshow/crossbar.cpp
 libdshow_plugin_la_LIBADD = $(LIBCOM) -loleaut32 -luuid -lstrmiids -lksuser
 if HAVE_WIN32_DESKTOP
-access_LTLIBRARIES += libdshow_plugin.la
+#access_LTLIBRARIES += libdshow_plugin.la
 endif
 
 
