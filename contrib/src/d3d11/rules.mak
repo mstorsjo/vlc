@@ -24,7 +24,7 @@ DST_DXGI16_H = $(PREFIX)/include/dxgi1_6.h
 
 
 ifdef HAVE_WIN32
-PKGS += d3d11
+#PKGS += d3d11
 endif
 
 $(TARBALLS)/d3d11.idl:
