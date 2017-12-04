@@ -82,7 +82,7 @@ package-win-npapi: build-npapi
 	mkdir -p "$(win32_destdir)/sdk/activex/"
 	cd $(top_builddir)/npapi-vlc && cp activex/README.TXT share/test/test.html $(win32_destdir)/sdk/activex/
 
-package-win-strip: package-win-common package-win-npapi
+package-win-strip: package-win-common
 	mkdir -p "$(win32_debugdir)"/
 	cd $(win32_destdir); find . -type f \( -name '*$(LIBEXT)' -or -name '*$(EXEEXT)' \) | while read i; \
 	do if test -n "$$i" ; then \
