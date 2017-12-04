@@ -1,0 +1,15 @@
+**/*.swp
+Dockerfile*
+.dockerignore
+.git
+extras/tools/Makefile
+extras/tools/build
+extras/tools/.*
+extras/tools/*.tar.gz
+extras/tools/*.tar.bz2
+extras/tools/*.tar.xz
+extras/tools/*.zip
+contrib/build-*
+contrib/*-*-*
+contrib/bin
+contrib/tarballs
