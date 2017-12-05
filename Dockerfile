@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM llvm-mingw:latest
 
 RUN apt-get update && apt-get install -y gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 mingw-w64-tools lua5.2 libtool automake autoconf autopoint make gettext pkg-config qt4-dev-tools qt5-default git subversion cmake cvs wine64-development-tools zip p7zip nsis bzip2 yasm ragel ant default-jdk protobuf-compiler dos2unix vim gperf
 
