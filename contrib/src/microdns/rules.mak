@@ -19,6 +19,7 @@ $(TARBALLS)/microdns-$(LIBMICRODNS_VERSION).tar.gz:
 
 microdns: microdns-$(LIBMICRODNS_VERSION).tar.gz .sum-microdns
 	$(UNPACK)
+	$(APPLY) $(SRC)/microdns/configure-win32-version.patch
 	$(MOVE)
 
 .microdns: microdns

@@ -1,0 +1,21 @@
+diff -urN microdns-orig/configure microdns/configure
+--- microdns-orig/configure	2017-09-26 16:03:35.000000000 +0000
++++ microdns/configure	2017-12-13 20:54:04.591084000 +0000
+@@ -12910,7 +12910,9 @@
+ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+ 
++    #include <stddef.h>
+     #ifdef _WIN32
++        #include <windows.h>
+         # if _WIN32_WINNT < 0x600
+         #  error Needs vista+
+         # endif
+@@ -12948,6 +12950,7 @@
+ 
+     #include <stddef.h>
+         #ifdef _WIN32
++        #include <windows.h>
+         # if _WIN32_WINNT < 0x600
+         #  error Needs vista+
+         # endif
