@@ -1,0 +1,40 @@
+diff -urN libupnp-1.6.19-orig/upnp/src/inc/inet_pton.h libupnp-1.6.19/upnp/src/inc/inet_pton.h
+--- libupnp-1.6.19-orig/upnp/src/inc/inet_pton.h	2010-12-23 20:24:06.000000000 +0000
++++ libupnp-1.6.19/upnp/src/inc/inet_pton.h	2017-12-13 20:42:58.718223756 +0000
+@@ -13,6 +13,8 @@
+ #include <stdio.h>
+ #include <string.h>
+ 
++#if _WIN32_WINNT < 0x600
++
+ /*!
+  * \file
+  *
+@@ -45,6 +47,8 @@
+  */
+ extern int inet_pton(int af, const char *src, void *dst);
+ 
++#endif /* _WIN32_WINNT < 0x600 */
++
+ #endif /* WIN32 */
+ 
+ #endif /* INET_PTON */
+diff -urN libupnp-1.6.19-orig/upnp/src/inet_pton.c libupnp-1.6.19/upnp/src/inet_pton.c
+--- libupnp-1.6.19-orig/upnp/src/inet_pton.c	2010-12-23 20:24:06.000000000 +0000
++++ libupnp-1.6.19/upnp/src/inet_pton.c	2017-12-13 20:42:38.198690024 +0000
+@@ -24,6 +24,8 @@
+ 
+ #include "inet_pton.h"
+ 
++#if _WIN32_WINNT < 0x600
++
+ /*!
+  * \brief format an IPv4 address
+  *
+@@ -320,4 +322,6 @@
+ 	/* NOTREACHED */
+ }
+ 
++#endif /* _WIN32_WINNT < 0x600 */
++
+ #endif /* WIN32 */
