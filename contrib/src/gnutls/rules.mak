@@ -48,6 +48,7 @@ GNUTLS_CONF := \
 	--disable-gtk-doc \
 	--without-p11-kit \
 	--disable-cxx \
+	--disable-hardware-acceleration \
 	--disable-srp-authentication \
 	--disable-psk-authentication-FIXME \
 	--disable-anon-authentication \
