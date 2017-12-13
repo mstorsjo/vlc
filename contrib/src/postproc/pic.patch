@@ -1,0 +1,12 @@
+diff -urN postproc-orig/configure postproc/configure
+--- postproc-orig/configure	2012-08-21 20:27:39.000000000 +0000
++++ postproc/configure	2017-12-13 15:00:09.535996913 +0000
+@@ -2376,7 +2376,7 @@
+         ;;
+ esac
+ 
+-check_cpp_condition stdlib.h "defined(__PIC__) || defined(__pic__) || defined(PIC)" && enable pic
++#check_cpp_condition stdlib.h "defined(__PIC__) || defined(__pic__) || defined(PIC)" && enable pic
+ 
+ set_default $PATHS_LIST
+ 
