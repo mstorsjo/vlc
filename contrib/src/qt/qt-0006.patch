@@ -1,0 +1,76 @@
+From 4f9d154b35f5d70ff14da66e50b92549f4b6b3a0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Storsj=C3=B6?= <martin@martin.st>
+Date: Fri, 24 Nov 2017 10:10:23 +0200
+Subject: [PATCH 6/8] moc: Make sure to initialize staticMetaObject with the
+ highest user-settable priority
+
+The referenced static meta object for the superclass might be in a
+different DLL - in this case, the whole QMetaObject can't be initialized
+all via preinitialized data in the data section of the binary, but must
+run code at runtime to fill in the value of the dllimported pointer.
+
+In these cases, both GCC and MSVC initialize as much as possible statically,
+while only filling in the dllimported values at runtime. Clang, on the other
+side, initializes the whole struct at runtime if some part of it needs
+runtime initialization, leaving the struct completely uninitialized
+before constructors are run.
+
+In C++, there are no guarantees for in what order constructors in
+different translation units are executed. This in particular means
+that there are no guarantees as to whether qRegisterWidgetsVariant()
+in qwidgetsvariants.cpp runs before or after the runtime initialization
+of QWidget::staticMetaObject.
+
+With GCC and MSVC, this doesn't seem to have mattered since only the
+superdata pointer of the staticMetaObject was uninitialized - everything
+else was initialized, and the superdata pointer doesn't seem to be
+accessed during qRegisterWidgetsVariant.
+
+With clang, the whole staticMetaObject is uninitialized, unless the
+staticMetaObject has been initialized before (and the initialization
+order is undefined).
+
+By setting a manual priority for the staticMetaObjects, we can be
+sure that these are initialized before the actual explicit
+constructor invocations that can access the staticMetaObjects.
+---
+ src/corelib/global/qglobal.h | 6 ++++++
+ src/tools/moc/generator.cpp  | 4 ++--
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/src/corelib/global/qglobal.h b/src/corelib/global/qglobal.h
+index 118203f..94710af 100644
+--- a/src/corelib/global/qglobal.h
++++ b/src/corelib/global/qglobal.h
+@@ -505,6 +505,12 @@ typedef qptrdiff qintptr;
+ #  define Q_ALWAYS_INLINE inline
+ #endif
+ 
++#ifdef Q_CC_GNU
++#  define Q_INIT_PRIORITY __attribute__((init_priority(101)))
++#else
++#  define Q_INIT_PRIORITY
++#endif
++
+ //defines the type for the WNDPROC on windows
+ //the alignment needs to be forced for sse2 to not crash with mingw
+ #if defined(Q_OS_WIN)
+diff --git a/src/tools/moc/generator.cpp b/src/tools/moc/generator.cpp
+index 7de6fe6..47210d3 100644
+--- a/src/tools/moc/generator.cpp
++++ b/src/tools/moc/generator.cpp
+@@ -522,9 +522,9 @@ void Generator::generateCode()
+ // Finally create and initialize the static meta object
+ //
+     if (isQt)
+-        fprintf(out, "const QMetaObject QObject::staticQtMetaObject = {\n");
++        fprintf(out, "Q_INIT_PRIORITY const QMetaObject QObject::staticQtMetaObject = {\n");
+     else
+-        fprintf(out, "const QMetaObject %s::staticMetaObject = {\n", cdef->qualified.constData());
++        fprintf(out, "Q_INIT_PRIORITY const QMetaObject %s::staticMetaObject = {\n", cdef->qualified.constData());
+ 
+     if (isQObject)
+         fprintf(out, "    { Q_NULLPTR, ");
+-- 
+2.7.4
+

@@ -1,0 +1,31 @@
+From 98030f8358e80f22907d960a266f4de2873194b7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Storsj=C3=B6?= <martin@martin.st>
+Date: Sat, 11 Nov 2017 16:59:31 +0200
+Subject: [PATCH 7/8] Don't try to use __attribute__((regparm(3))) blindly on
+ any _WIN32
+
+This fixes building with clang for MinGW/ARM and ARM64.
+
+When targeting ARM, clang doesn't support the regparm attribute.
+It does however support the __fastcall calling convention attribute
+(which it silently ignores on non-x86 platforms, just like MSVC).
+---
+ src/corelib/global/qglobal.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/corelib/global/qglobal.h b/src/corelib/global/qglobal.h
+index 118203f..8dbccb3 100644
+--- a/src/corelib/global/qglobal.h
++++ b/src/corelib/global/qglobal.h
+@@ -470,7 +470,7 @@ typedef qptrdiff qintptr;
+ #endif
+ 
+ #if defined(__i386__) || defined(_WIN32) || defined(_WIN32_WCE)
+-#  if defined(Q_CC_GNU)
++#  if defined(Q_CC_GNU) && (defined(__i386__) || defined(__x86_64__))
+ #    define QT_FASTCALL __attribute__((regparm(3)))
+ #  elif defined(Q_CC_MSVC)
+ #    define QT_FASTCALL __fastcall
+-- 
+2.7.4
+

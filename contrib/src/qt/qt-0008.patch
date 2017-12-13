@@ -1,0 +1,28 @@
+From 63d5a03bed18841bdfad6dfb577273e286d76c43 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Storsj=C3=B6?= <martin@martin.st>
+Date: Sat, 11 Nov 2017 16:59:38 +0200
+Subject: [PATCH] Disable pixman arm asm
+
+This doesn't assemble properly with clang.
+---
+ src/gui/painting/painting.pri | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/gui/painting/painting.pri b/src/gui/painting/painting.pri
+index 1e516e4..5e8fd88 100644
+--- a/src/gui/painting/painting.pri
++++ b/src/gui/painting/painting.pri
+@@ -103,8 +103,8 @@ AVX2_SOURCES += painting/qdrawhelper_avx2.cpp
+ 
+ NEON_SOURCES += painting/qdrawhelper_neon.cpp
+ NEON_HEADERS += painting/qdrawhelper_neon_p.h
+-NEON_ASM += ../3rdparty/pixman/pixman-arm-neon-asm.S painting/qdrawhelper_neon_asm.S
+-!ios:!contains(QT_ARCH, "arm64"): DEFINES += ENABLE_PIXMAN_DRAWHELPERS
++#NEON_ASM += ../3rdparty/pixman/pixman-arm-neon-asm.S painting/qdrawhelper_neon_asm.S
++#!ios:!contains(QT_ARCH, "arm64"): DEFINES += ENABLE_PIXMAN_DRAWHELPERS
+ 
+ MIPS_DSP_SOURCES += painting/qdrawhelper_mips_dsp.cpp
+ MIPS_DSP_HEADERS += painting/qdrawhelper_mips_dsp_p.h painting/qt_mips_asm_dsp_p.h
+-- 
+2.7.4
+

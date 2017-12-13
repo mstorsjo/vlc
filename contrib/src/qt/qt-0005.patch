@@ -1,0 +1,46 @@
+From b7cd187bb789e4710d2d4ef8caae43ba849aadce Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Storsj=C3=B6?= <martin@martin.st>
+Date: Sat, 11 Nov 2017 16:59:15 +0200
+Subject: [PATCH 5/8] Force building without rtti
+
+Any virtual class with dllexport should get typeinfo emitted and
+exported, like this:
+
+class __declspec(dllexport) VirtualClass {
+public:
+    void virtual bar();
+};
+
+This gets emitted and exported with clang in msvc mode and with gcc,
+but not with clang.
+
+Bug: https://bugs.llvm.org/show_bug.cgi?id=35146
+---
+ mkspecs/win32-g++/qmake.conf | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/mkspecs/win32-g++/qmake.conf b/mkspecs/win32-g++/qmake.conf
+index 42f8af8..5207654 100644
+--- a/mkspecs/win32-g++/qmake.conf
++++ b/mkspecs/win32-g++/qmake.conf
+@@ -45,7 +45,7 @@ QMAKE_CFLAGS_AVX2       = -mavx2
+ QMAKE_CFLAGS_NEON       = -mfpu=neon
+ 
+ QMAKE_CXX               = $${CROSS_COMPILE}g++
+-QMAKE_CXXFLAGS          = $$QMAKE_CFLAGS
++QMAKE_CXXFLAGS          = $$QMAKE_CFLAGS -fno-rtti
+ QMAKE_CXXFLAGS_DEPS     = $$QMAKE_CFLAGS_DEPS
+ QMAKE_CXXFLAGS_WARN_ON  = $$QMAKE_CFLAGS_WARN_ON
+ QMAKE_CXXFLAGS_WARN_OFF = $$QMAKE_CFLAGS_WARN_OFF
+@@ -54,7 +54,7 @@ QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO = $$QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO
+ QMAKE_CXXFLAGS_DEBUG    = $$QMAKE_CFLAGS_DEBUG
+ QMAKE_CXXFLAGS_YACC     = $$QMAKE_CFLAGS_YACC
+ QMAKE_CXXFLAGS_THREAD   = $$QMAKE_CFLAGS_THREAD
+-QMAKE_CXXFLAGS_RTTI_ON  = -frtti
++QMAKE_CXXFLAGS_RTTI_ON  =
+ QMAKE_CXXFLAGS_RTTI_OFF = -fno-rtti
+ QMAKE_CXXFLAGS_EXCEPTIONS_ON = -fexceptions -mthreads
+ QMAKE_CXXFLAGS_EXCEPTIONS_OFF = -fno-exceptions
+-- 
+2.7.4
+

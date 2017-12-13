@@ -1,0 +1,26 @@
+From ea25c54f433d179efadc73461ac9d350c3090336 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Storsj=C3=B6?= <martin@martin.st>
+Date: Sat, 11 Nov 2017 16:58:49 +0200
+Subject: [PATCH 1/8] Remove -fno-keep-inline-dllexport
+
+clang doesn't support it.
+---
+ mkspecs/win32-g++/qmake.conf | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mkspecs/win32-g++/qmake.conf b/mkspecs/win32-g++/qmake.conf
+index 6ed3974..5f5689e 100644
+--- a/mkspecs/win32-g++/qmake.conf
++++ b/mkspecs/win32-g++/qmake.conf
+@@ -26,7 +26,7 @@ QMAKE_LEX               = flex
+ QMAKE_LEXFLAGS          =
+ QMAKE_YACC              = bison -y
+ QMAKE_YACCFLAGS         = -d
+-QMAKE_CFLAGS            = -pipe -fno-keep-inline-dllexport
++QMAKE_CFLAGS            = -pipe
+ QMAKE_CFLAGS_DEPS       = -M
+ QMAKE_CFLAGS_WARN_ON    = -Wall -Wextra
+ QMAKE_CFLAGS_WARN_OFF   = -w
+-- 
+2.7.4
+

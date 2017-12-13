@@ -1,0 +1,25 @@
+From 55778e511bfdf6bd0f545e78d7777c76136ae445 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Storsj=C3=B6?= <martin@martin.st>
+Date: Sat, 11 Nov 2017 16:59:11 +0200
+Subject: [PATCH 4/8] Fix building for win64 with clang
+
+---
+ src/3rdparty/harfbuzz-ng/src/hb-private.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/3rdparty/harfbuzz-ng/src/hb-private.hh b/src/3rdparty/harfbuzz-ng/src/hb-private.hh
+index 53e0510..f3df3fb 100644
+--- a/src/3rdparty/harfbuzz-ng/src/hb-private.hh
++++ b/src/3rdparty/harfbuzz-ng/src/hb-private.hh
+@@ -671,7 +671,7 @@ _hb_debug_msg_va (const char *what,
+   fprintf (stderr, "%-10s", what ? what : "");
+ 
+   if (obj)
+-    fprintf (stderr, "(%0*lx) ", (unsigned int) (2 * sizeof (void *)), (unsigned long) obj);
++    fprintf (stderr, "(%0*lx) ", (unsigned int) (2 * sizeof (void *)), (unsigned long)(uintptr_t) obj);
+   else
+     fprintf (stderr, " %*s  ", (unsigned int) (2 * sizeof (void *)), "");
+ 
+-- 
+2.7.4
+

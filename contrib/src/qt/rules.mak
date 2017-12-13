@@ -25,6 +25,14 @@ qt: qt-$(QT_VERSION).tar.xz .sum-qt
 	$(APPLY) $(SRC)/qt/0001-Windows-QPA-Reimplement-calculation-of-window-frames_56.patch  
 	$(APPLY) $(SRC)/qt/0002-Windows-QPA-Use-new-EnableNonClientDpiScaling-for-Wi_56.patch
 	$(APPLY) $(SRC)/qt/systray-no-sound.patch
+	$(APPLY) $(SRC)/qt/qt-0001.patch
+	$(APPLY) $(SRC)/qt/qt-0002.patch
+	$(APPLY) $(SRC)/qt/qt-0003.patch
+	$(APPLY) $(SRC)/qt/qt-0004.patch
+#	$(APPLY) $(SRC)/qt/qt-0005.patch
+	$(APPLY) $(SRC)/qt/qt-0006.patch
+	$(APPLY) $(SRC)/qt/qt-0007.patch
+	$(APPLY) $(SRC)/qt/qt-0008.patch
 	$(MOVE)
 
 ifdef HAVE_MACOSX

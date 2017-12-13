@@ -1,0 +1,26 @@
+From d9cac113ad5315fef9b431ae5b24a32d0f633442 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Storsj=C3=B6?= <martin@martin.st>
+Date: Sat, 11 Nov 2017 16:58:57 +0200
+Subject: [PATCH 3/8] Avoid using a linker script for specifying object files
+
+LLD/COFF doesn't support this.
+---
+ mkspecs/win32-g++/qmake.conf | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mkspecs/win32-g++/qmake.conf b/mkspecs/win32-g++/qmake.conf
+index 5f5689e..42f8af8 100644
+--- a/mkspecs/win32-g++/qmake.conf
++++ b/mkspecs/win32-g++/qmake.conf
+@@ -87,7 +87,7 @@ QMAKE_LFLAGS_CXX11      =
+ QMAKE_LFLAGS_CXX14      =
+ QMAKE_LFLAGS_CXX1Z      =
+ QMAKE_LFLAGS_GCSECTIONS = -Wl,--gc-sections
+-QMAKE_LINK_OBJECT_MAX   = 10
++QMAKE_LINK_OBJECT_MAX   = 99999
+ QMAKE_LINK_OBJECT_SCRIPT = object_script
+ QMAKE_PREFIX_SHLIB      =
+ QMAKE_EXTENSION_SHLIB   = dll
+-- 
+2.7.4
+
