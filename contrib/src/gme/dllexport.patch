@@ -1,0 +1,14 @@
+diff -urN game-music-emu-orig/gme/gme.cpp game-music-emu/gme/gme.cpp
+--- game-music-emu-orig/gme/gme.cpp	2013-03-17 01:38:55.000000000 +0000
++++ game-music-emu/gme/gme.cpp	2017-12-13 21:26:21.083155507 +0000
+@@ -23,6 +23,10 @@
+ 
+ #include "blargg_source.h"
+ 
++BLARGG_EXPORT Music_Emu* gme_new_emu( gme_type_t, int );
++BLARGG_EXPORT gme_err_t gme_load_data( Music_Emu*, void const* data, long size );  
++BLARGG_EXPORT void gme_free_info( gme_info_t* );
++
+ BLARGG_EXPORT gme_type_t const* gme_type_list()
+ {
+ 	static gme_type_t const gme_type_list_ [] = {
