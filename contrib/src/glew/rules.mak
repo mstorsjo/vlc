@@ -15,13 +15,11 @@ glew: glew-$(GLEW_VERSION).tar.gz .sum-glew
 	$(UNPACK)
 ifdef HAVE_WIN32
 	$(APPLY) $(SRC)/glew/win32.patch
+	$(APPLY) $(SRC)/glew/skip-dll.patch
 endif
 	$(MOVE)
 
 .glew: glew
 	cd $< && $(HOSTVARS) CFLAGS="$(CFLAGS) -DGLEW_STATIC" $(MAKE)
 	cd $< && $(HOSTVARS) GLEW_DEST=$(PREFIX) $(MAKE) install
-ifdef HAVE_WIN32
-	-rm $(PREFIX)/lib/*glew32.dll*
-endif
 	touch $@
