@@ -6,7 +6,7 @@ LIVEDOTCOM_URL := http://live555.com/liveMedia/public/$(LIVE555_FILE)
 
 ifdef BUILD_NETWORK
 ifdef GNUV3
-PKGS += live555
+#PKGS += live555
 endif
 endif
 
