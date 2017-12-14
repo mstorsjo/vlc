@@ -1,0 +1,37 @@
+diff -urN projectM-orig/MilkdropPresetFactory/CMakeLists.txt projectM/MilkdropPresetFactory/CMakeLists.txt
+--- projectM-orig/MilkdropPresetFactory/CMakeLists.txt	2017-12-13 21:35:27.000000000 +0000
++++ projectM/MilkdropPresetFactory/CMakeLists.txt	2017-12-14 07:16:23.806946015 +0000
+@@ -11,8 +11,6 @@
+         InitCond.cpp Parser.cpp CustomWave.cpp Expr.cpp PerPointEqn.cpp
+         Param.cpp PerFrameEqn.cpp IdlePreset.cpp ../PresetFactory.cpp )
+ 
+-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+-
+ INCLUDE_DIRECTORIES(${projectM_SOURCE_DIR} ${Renderer_SOURCE_DIR})
+ LINK_DIRECTORIES(${projectM_BINARY_DIR} ${Renderer_BINARY_DIR})
+ 
+diff -urN projectM-orig/NativePresetFactory/CMakeLists.txt projectM/NativePresetFactory/CMakeLists.txt
+--- projectM-orig/NativePresetFactory/CMakeLists.txt	2009-12-06 01:42:51.000000000 +0000
++++ projectM/NativePresetFactory/CMakeLists.txt	2017-12-14 07:16:41.566553903 +0000
+@@ -7,8 +7,6 @@
+ 
+ SET(NativePresetFactory_SOURCES NativePresetFactory.cpp)
+ 
+-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+- 
+ INCLUDE_DIRECTORIES(${projectM_SOURCE_DIR} ${Renderer_SOURCE_DIR})
+ ADD_LIBRARY(NativePresetFactory STATIC ${NativePresetFactory_SOURCES})
+ SET_TARGET_PROPERTIES(NativePresetFactory PROPERTIES VERSION 2.00 SOVERSION 2)
+diff -urN projectM-orig/Renderer/CMakeLists.txt projectM/Renderer/CMakeLists.txt
+--- projectM-orig/Renderer/CMakeLists.txt	2009-12-06 01:42:51.000000000 +0000
++++ projectM/Renderer/CMakeLists.txt	2017-12-14 07:16:33.886723466 +0000
+@@ -7,9 +7,6 @@
+ Filters.cpp PerlinNoise.cpp PipelineContext.cpp  Renderable.cpp BeatDetect.cpp Shader.cpp TextureManager.cpp VideoEcho.cpp 
+ RenderItemDistanceMetric.cpp RenderItemMatcher.cpp ${SOIL_SOURCES})
+ 
+-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+-SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+-
+ INCLUDE_DIRECTORIES(${projectM_SOURCE_DIR})
+ ADD_LIBRARY(Renderer STATIC ${Renderer_SOURCES})
+ SET_TARGET_PROPERTIES(Renderer PROPERTIES VERSION 2.00 SOVERSION 2)
