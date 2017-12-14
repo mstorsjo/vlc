@@ -6,7 +6,7 @@ X265_SNAPURL := https://bitbucket.org/multicoreware/x265/get/$(X265_VERSION).tar
 
 ifdef BUILD_ENCODERS
 ifdef GPL
-#PKGS += x265
+PKGS += x265
 endif
 endif
 

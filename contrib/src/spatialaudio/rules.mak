@@ -5,7 +5,7 @@ SPATIALAUDIO_URL = https://github.com/videolabs/libspatialaudio/releases/downloa
 
 DEPS_spatialaudio = zlib mysofa
 
-#PKGS += spatialaudio
+PKGS += spatialaudio
 
 ifeq ($(call need_pkg,"spatialaudio"),)
 PKGS_FOUND += spatialaudio
