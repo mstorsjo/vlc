@@ -3,7 +3,7 @@ UPNP_VERSION := 1.6.19
 UPNP_URL := $(SF)/pupnp/libupnp-$(UPNP_VERSION).tar.bz2
 
 ifdef BUILD_NETWORK
-PKGS += upnp
+#PKGS += upnp
 endif
 
 $(TARBALLS)/libupnp-$(UPNP_VERSION).tar.bz2:

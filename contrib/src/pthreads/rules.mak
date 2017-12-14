@@ -12,7 +12,7 @@ $(TARBALLS)/pthreads-w32-$(PTHREADS_W32_VERSION)-release.tar.gz:
 
 .sum-pthreads: pthreads-w32-$(PTHREADS_W32_VERSION)-release.tar.gz
 
-ifdef HAVE_WIN32
+ifdef HAVE_WIN32_DISABLED
 pthreads: pthreads-w32-$(PTHREADS_W32_VERSION)-release.tar.gz .sum-pthreads
 	$(UNPACK)
 	sed -e 's/^CROSS.*=/CROSS ?=/' -i.orig $(UNPACK_DIR)/GNUmakefile

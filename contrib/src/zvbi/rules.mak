@@ -3,7 +3,7 @@
 ZVBI_VERSION := 0.2.35
 ZVBI_URL := $(SF)/zapping/zvbi-$(ZVBI_VERSION).tar.bz2
 
-PKGS += zvbi
+#PKGS += zvbi
 ifeq ($(call need_pkg,"zvbi-0.2"),)
 PKGS_FOUND += zvbi
 endif

@@ -3,7 +3,7 @@
 MYSOFA_VERSION := 65d92e6463537c9f7907b69c2c768a7c8c3a02b5
 MYSOFA_GITURL = https://github.com/hoene/libmysofa.git
 
-PKGS += mysofa
+#PKGS += mysofa
 
 ifeq ($(call need_pkg,"mysofa"),)
 PKGS_FOUND += mysofa
