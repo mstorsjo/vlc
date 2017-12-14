@@ -549,8 +549,8 @@ dnl Check for broken versions of mingw-runtime compatability library
 
     dnl Check for fnative-struct or mms-bitfields support for mingw32
     VLC_SAVE_FLAGS
-    CFLAGS="${CFLAGS} -mms-bitfields"
-    CXXFLAGS="${CXXFLAGS} -mms-bitfields"
+    CFLAGS="${CFLAGS} -mms-bitfields -Wno-incompatible-ms-struct"
+    CXXFLAGS="${CXXFLAGS} -mms-bitfields -Wno-incompatible-ms-struct"
     AC_CACHE_CHECK([if \$CC accepts -mms-bitfields],
         [ac_cv_c_mms_bitfields],
         [AC_TRY_COMPILE([],,ac_cv_c_mms_bitfields=yes, ac_cv_c_mms_bitfields=no)])
