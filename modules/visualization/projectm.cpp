@@ -36,6 +36,7 @@
 
 #include <libprojectM/projectM.hpp>
 
+#include <locale>
 #ifndef _WIN32
 # include <locale.h>
 #endif

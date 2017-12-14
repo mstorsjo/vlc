@@ -320,6 +320,7 @@ void *aligned_alloc(size_t, size_t);
 
 /* locale.h */
 #ifndef HAVE_USELOCALE
+#ifndef __cplusplus
 #define LC_ALL_MASK      0
 #define LC_NUMERIC_MASK  0
 #define LC_MESSAGES_MASK 0
@@ -339,6 +340,7 @@ static inline locale_t newlocale(int mask, const char * locale, locale_t base)
     (void)mask; (void)locale; (void)base;
     return NULL;
 }
+#endif
 #endif
 
 #if !defined (HAVE_STATIC_ASSERT) && !defined(__cpp_static_assert)
