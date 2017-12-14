@@ -1,0 +1,24 @@
+diff -urN flac-orig/configure flac/configure
+--- flac-orig/configure	2017-01-01 03:46:48.177724022 +0000
++++ flac/configure	2017-12-14 21:41:25.319272580 +0000
+@@ -18589,7 +18589,7 @@
+ os_is_windows=no
+ case "$host" in
+ 	*-*-cygwin|*mingw*)
+-		CPPFLAGS="-D__MSVCRT_VERSION__=0x0601 $CPPFLAGS"
++		CPPFLAGS="-D__MSVCRT_VERSION__=0x1400 $CPPFLAGS"
+ 		os_is_windows=yes
+ 		;;
+ esac
+diff -urN flac-orig/configure.ac flac/configure.ac
+--- flac-orig/configure.ac	2017-01-01 01:46:35.224989057 +0000
++++ flac/configure.ac	2017-12-14 21:41:18.171434278 +0000
+@@ -178,7 +178,7 @@
+ os_is_windows=no
+ case "$host" in
+ 	*-*-cygwin|*mingw*)
+-		CPPFLAGS="-D__MSVCRT_VERSION__=0x0601 $CPPFLAGS"
++		CPPFLAGS="-D__MSVCRT_VERSION__=0x1400 $CPPFLAGS"
+ 		os_is_windows=yes
+ 		;;
+ esac
