@@ -197,8 +197,8 @@ libmkv_plugin_la_LIBADD = $(LIBS_mkv)
 if HAVE_ZLIB
 libmkv_plugin_la_LIBADD += -lz
 endif
-demux_LTLIBRARIES += $(LTLIBmkv)
-EXTRA_LTLIBRARIES += libmkv_plugin.la
+#demux_LTLIBRARIES += $(LTLIBmkv)
+#EXTRA_LTLIBRARIES += libmkv_plugin.la
 
 libmp4_plugin_la_SOURCES = demux/mp4/mp4.c demux/mp4/mp4.h \
                            demux/mp4/fragments.c demux/mp4/fragments.h \
