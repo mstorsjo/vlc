@@ -128,8 +128,8 @@ libd3d11_surface_plugin_la_SOURCES = video_chroma/d3d11_surface.c \
         video_chroma/copy.c video_chroma/copy.h
 
 if HAVE_AVCODEC_D3D11VA
-chroma_LTLIBRARIES += \
-	libd3d11_surface_plugin.la
+#chroma_LTLIBRARIES += \
+#	libd3d11_surface_plugin.la
 endif
 
 libcvpx_plugin_la_SOURCES = codec/vt_utils.c codec/vt_utils.h video_chroma/cvpx.c
