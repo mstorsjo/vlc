@@ -678,6 +678,7 @@ AC_SEARCH_LIBS([inet_pton], [nsl], [
 LIBS="${LIBS} ${SOCKET_LIBS}"
 AC_LINK_IFELSE([
     AC_LANG_PROGRAM([#ifdef _WIN32
+        # include <windows.h>
         # if _WIN32_WINNT < 0x600
         #  error Needs vista+
         # endif
