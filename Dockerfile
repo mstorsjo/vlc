@@ -9,6 +9,18 @@ RUN git config --global user.name "VideoLAN Buildbot" && \
 
 WORKDIR /build/vlc
 
+RUN cd /build/mingw-w64/mingw-w64-tools/widl && \
+    mkdir build && cd build && \
+    ../configure --prefix=$TOOLCHAIN_PREFIX --target=x86_64-w64-mingw32 && \
+    make -j4 && \
+    make install
+RUN cd $TOOLCHAIN_PREFIX/bin && \
+    for arch in $TOOLCHAIN_ARCHS; do \
+        if [ $arch != x86_64 ]; then \
+            ln -s x86_64-w64-mingw32-widl $arch-w64-mingw32-widl; \
+        fi; \
+    done
+
 ADD extras/tools /build/vlc/extras/tools/
 RUN cd extras/tools && ./bootstrap && make -j$CORES
 ENV PATH=/build/vlc/extras/tools/build/bin:$PATH
