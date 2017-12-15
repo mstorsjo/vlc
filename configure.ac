@@ -933,6 +933,10 @@ dnl
 AX_APPEND_COMPILE_FLAGS([-Wall -Wextra -Wsign-compare -Wundef -Wpointer-arith -Wvolatile-register-var -Wformat -Wformat-security], [CFLAGS])
 AX_APPEND_COMPILE_FLAGS([-Wall -Wextra -Wsign-compare -Wundef -Wpointer-arith -Wvolatile-register-var -Wformat -Wformat-security], [CXXFLAGS])
 
+dnl Clang doesn't support the gnu_printf format attribute
+AX_APPEND_COMPILE_FLAGS([-Wno-ignored-attributes], [CFLAGS])
+AX_APPEND_COMPILE_FLAGS([-Wno-ignored-attributes], [CXXFLAGS])
+
 AX_APPEND_COMPILE_FLAGS([-Wbad-function-cast -Wwrite-strings -Wmissing-prototypes -Werror-implicit-function-declaration -Winit-self -Wlogical-op -Wshadow=local], [CFLAGS])
 AX_APPEND_COMPILE_FLAGS([-pipe], [CFLAGS])
 
