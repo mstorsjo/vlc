@@ -85,7 +85,7 @@ static FT_Face LoadFace( filter_t *p_filter, const char *psz_fontfile, int i_idx
         }
     }
 
-#if defined( _WIN32 ) && 0
+#if defined( _WIN32 )
     else if( !memcmp( psz_fontfile, ":dw/", 4 ) )
     {
         int i_index = atoi( psz_fontfile + 4 );
@@ -579,7 +579,7 @@ char* Generic_Select( filter_t *p_filter, const char* psz_family,
     return File_Select( SYSTEM_DEFAULT_FONT_FILE );
 }
 
-#if !defined(_WIN32) || VLC_WINSTORE_APP || 1
+#if !defined(_WIN32) || VLC_WINSTORE_APP
 char* Dummy_Select( filter_t *p_filter, const char* psz_font,
                     bool b_bold, bool b_italic,
                     int *i_idx, uni_char_t codepoint )

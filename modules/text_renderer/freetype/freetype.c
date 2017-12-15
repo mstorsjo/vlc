@@ -50,7 +50,7 @@
 #endif
 
 /* Win32 */
-#if defined(_WIN32) && 0
+#ifdef _WIN32
 # undef HAVE_FONTCONFIG
 # define HAVE_GET_FONT_BY_FAMILY_NAME
 #endif
@@ -1283,7 +1283,7 @@ static int Create( vlc_object_t *p_this )
     p_sys->pf_select = Generic_Select;
     p_sys->pf_get_family = CoreText_GetFamily;
     p_sys->pf_get_fallbacks = CoreText_GetFallbacks;
-#elif defined( _WIN32 ) && 0
+#elif defined( _WIN32 )
     if( InitDWrite( p_filter ) == VLC_SUCCESS )
     {
         p_sys->pf_get_family = DWrite_GetFamily;
@@ -1385,7 +1385,7 @@ static void Destroy( vlc_object_t *p_this )
     if( p_sys->p_face != NULL )
         FontConfig_Unprepare();
 
-#elif defined( _WIN32 ) && 0
+#elif defined( _WIN32 )
     if( p_sys->pf_get_family == DWrite_GetFamily )
         ReleaseDWrite( p_filter );
 #endif
