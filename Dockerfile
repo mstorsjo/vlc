@@ -19,7 +19,7 @@ RUN mkdir -p contrib/win32 && \
     ../bootstrap --host=x86_64-w64-mingw32 && \
     make -j$CORES fetch
 RUN cd contrib/win32 && \
-    make -j$CORES
+    make -j$CORES -k
 ADD . /build/vlc
 RUN /build/merge_archives.sh /build/prefix/x86_64-w64-mingw32/lib/libmingw32.a /build/prefix/lib/clang/6.0.0/lib/windows/libclang_rt.builtins-x86_64.a
 RUN ./bootstrap
@@ -28,6 +28,6 @@ RUN echo git > src/revision.txt
 RUN mkdir win32 && \
     cd win32 && \
     ../extras/package/win32/configure.sh --host=x86_64-w64-mingw32 --build=x86_64-pc-linux-gnu && \
-    make -j$CORES
+    make -j$CORES -k
 RUN cd win32 && \
     make package-win-strip
