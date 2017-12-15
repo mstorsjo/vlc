@@ -19,7 +19,7 @@ DST_DXVA2API_H = $(PREFIX)/include/dxva2api.h
 
 ifdef HAVE_WIN32
 ifndef HAVE_VISUALSTUDIO
-#PKGS += d3d9
+PKGS += d3d9
 endif
 endif
 
