@@ -81,7 +81,7 @@ $(DST_DXGI16_H): $(SRC)/d3d11/dxgi1_6.idl $(DST_DXGI15_H)
 	mkdir -p -- "$(PREFIX)/include/"
 	$(WIDL) -DBOOL=WINBOOL -Idxgi12 -I$(IDL_INC_PATH) -h -o $@ $<
 
-.dxgitype: $(DST_DXGITYPE_H)
+.dxgitype:
 	touch $@
 
 .dxgi12: .dxgitype $(DST_DXGI12_H)
