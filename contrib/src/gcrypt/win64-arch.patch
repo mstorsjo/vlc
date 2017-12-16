@@ -1,0 +1,21 @@
+diff -urN gcrypt-orig/random/rndw32.c gcrypt/random/rndw32.c
+--- gcrypt-orig/random/rndw32.c	2017-05-03 10:45:22.000000000 +0000
++++ gcrypt/random/rndw32.c	2017-12-16 20:06:09.858552484 +0000
+@@ -972,7 +972,7 @@
+ 
+      On AMD64, TSC is always available and intrinsic is provided for accessing
+      it.  */
+-#ifdef __WIN64__
++#ifdef __x86_64__
+     {
+       unsigned __int64 aint64;
+ 
+@@ -1010,7 +1010,7 @@
+           (*add) (&aword, sizeof (aword), origin );
+         }
+     }
+-#endif /*__WIN64__*/
++#endif /*__x86_64__*/
+ 
+ 
+ }
