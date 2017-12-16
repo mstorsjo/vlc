@@ -395,7 +395,7 @@ LONG WINAPI vlc_exception_filter(struct _EXCEPTION_POINTERS *lpExceptionInfo)
         for( unsigned int i = 0; i < pException->NumberParameters; i++ )
             fwprintf( fd, L" | %p", pException->ExceptionInformation[i] );
 
-#ifdef _WIN64
+#ifdef __x86_64__
         fwprintf( fd, L"\n\n[context]\nRDI:%px\nRSI:%px\n" \
                     "RBX:%px\nRDX:%px\nRCX:%px\nRAX:%px\n" \
                     "RBP:%px\nRIP:%px\nRSP:%px\nR8:%px\n" \
@@ -407,7 +407,7 @@ LONG WINAPI vlc_exception_filter(struct _EXCEPTION_POINTERS *lpExceptionInfo)
                         pContext->R8,pContext->R9,pContext->R10,
                         pContext->R11,pContext->R12,pContext->R13,
                         pContext->R14,pContext->R15 );
-#else
+#elif defined(__i386__)
         fwprintf( fd, L"\n\n[context]\nEDI:%px\nESI:%px\n" \
                     "EBX:%px\nEDX:%px\nECX:%px\nEAX:%px\n" \
                     "EBP:%px\nEIP:%px\nESP:%px\n",
@@ -418,13 +418,14 @@ LONG WINAPI vlc_exception_filter(struct _EXCEPTION_POINTERS *lpExceptionInfo)
 
         fwprintf( fd, L"\n[stacktrace]\n#EIP|base|module\n" );
 
-#ifdef _WIN64
+#ifdef __x86_64__
         LPCVOID caller = (LPCVOID)pContext->Rip;
         LPVOID *pBase  = (LPVOID*)pContext->Rbp;
-#else
+#elif defined(__i386__)
         LPVOID *pBase  = (LPVOID*)pContext->Ebp;
         LPCVOID caller = (LPCVOID)pContext->Eip;
 #endif
+#if defined(__x86_64__) || defined(__i386__)
         for( unsigned frame = 0; frame <= 100; frame++ )
         {
             MEMORY_BASIC_INFORMATION mbi;
@@ -444,6 +445,7 @@ LONG WINAPI vlc_exception_filter(struct _EXCEPTION_POINTERS *lpExceptionInfo)
             if( !pBase )
                 break;
         }
+#endif
 
         HANDLE hpid = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
                                         FALSE, GetCurrentProcessId());
