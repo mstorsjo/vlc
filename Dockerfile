@@ -31,4 +31,4 @@ RUN mkdir win32 && \
     ../extras/package/win32/configure.sh --host=aarch64-w64-mingw32 --build=x86_64-pc-linux-gnu && \
     make -j$CORES -k
 RUN cd win32 && \
-    make package-win-strip
+    make package-win-common
