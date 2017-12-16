@@ -22,6 +22,7 @@ RUN cd contrib/win32 && \
     make -j$CORES -k
 ADD . /build/vlc
 RUN /build/merge_archives.sh /build/prefix/aarch64-w64-mingw32/lib/libmingw32.a /build/prefix/lib/clang/6.0.0/lib/windows/libclang_rt.builtins-aarch64.a
+RUN rm -rf /build/prefix/aarch64-w64-mingw32/include/GL
 RUN ./bootstrap
 ENV PKG_CONFIG_LIBDIR=/build/vlc/contrib/aarch64-w64-mingw32/lib/pkgconfig
 RUN echo git > src/revision.txt
