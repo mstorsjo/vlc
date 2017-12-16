@@ -1,0 +1,100 @@
+diff -urN gcrypt-orig/mpi/aarch64/mpih-add1.S gcrypt/mpi/aarch64/mpih-add1.S
+--- gcrypt-orig/mpi/aarch64/mpih-add1.S	2017-05-03 10:45:22.000000000 +0000
++++ gcrypt/mpi/aarch64/mpih-add1.S	2017-12-16 21:09:48.981189375 +0000
+@@ -34,7 +34,9 @@
+ .text
+ 
+ .globl _gcry_mpih_add_n
++#ifdef __ELF__
+ .type  _gcry_mpih_add_n,%function
++#endif
+ _gcry_mpih_add_n:
+ 	and	x5, x3, #3;
+ 	adds	xzr, xzr, xzr; /* clear carry flag */
+@@ -68,4 +70,6 @@
+ .Lend:
+ 	adc	x0, xzr, xzr;
+ 	ret;
++#ifdef __ELF__
+ .size _gcry_mpih_add_n,.-_gcry_mpih_add_n;
++#endif
+diff -urN gcrypt-orig/mpi/aarch64/mpih-mul1.S gcrypt/mpi/aarch64/mpih-mul1.S
+--- gcrypt-orig/mpi/aarch64/mpih-mul1.S	2017-05-03 10:45:22.000000000 +0000
++++ gcrypt/mpi/aarch64/mpih-mul1.S	2017-12-16 21:10:02.164896710 +0000
+@@ -34,7 +34,9 @@
+ .text
+ 
+ .globl _gcry_mpih_mul_1
++#ifdef __ELF__
+ .type  _gcry_mpih_mul_1,%function
++#endif
+ _gcry_mpih_mul_1:
+ 	and	x5, x2, #3;
+ 	mov	x4, xzr;
+@@ -93,4 +95,6 @@
+ .Lend:
+ 	mov	x0, x4;
+ 	ret;
++#ifdef __ELF__
+ .size _gcry_mpih_mul_1,.-_gcry_mpih_mul_1;
++#endif
+diff -urN gcrypt-orig/mpi/aarch64/mpih-mul2.S gcrypt/mpi/aarch64/mpih-mul2.S
+--- gcrypt-orig/mpi/aarch64/mpih-mul2.S	2017-05-03 10:45:22.000000000 +0000
++++ gcrypt/mpi/aarch64/mpih-mul2.S	2017-12-16 21:10:14.644619664 +0000
+@@ -34,7 +34,9 @@
+ .text
+ 
+ .globl _gcry_mpih_addmul_1
++#ifdef __ELF__
+ .type  _gcry_mpih_addmul_1,%function
++#endif
+ _gcry_mpih_addmul_1:
+ 	and	x5, x2, #3;
+ 	mov	x6, xzr;
+@@ -105,4 +107,6 @@
+ .Lend:
+ 	mov	x0, x6;
+ 	ret;
++#ifdef __ELF__
+ .size _gcry_mpih_addmul_1,.-_gcry_mpih_addmul_1;
++#endif
+diff -urN gcrypt-orig/mpi/aarch64/mpih-mul3.S gcrypt/mpi/aarch64/mpih-mul3.S
+--- gcrypt-orig/mpi/aarch64/mpih-mul3.S	2017-05-03 10:45:22.000000000 +0000
++++ gcrypt/mpi/aarch64/mpih-mul3.S	2017-12-16 21:10:26.236362322 +0000
+@@ -34,7 +34,9 @@
+ .text
+ 
+ .globl _gcry_mpih_submul_1
++#ifdef __ELF__
+ .type  _gcry_mpih_submul_1,%function
++#endif
+ _gcry_mpih_submul_1:
+ 	and	x5, x2, #3;
+ 	mov	x7, xzr;
+@@ -118,4 +120,6 @@
+ .Loop_end:
+ 	cinc	x0, x7, cc;
+ 	ret;
++#ifdef __ELF__
+ .size _gcry_mpih_submul_1,.-_gcry_mpih_submul_1;
++#endif
+diff -urN gcrypt-orig/mpi/aarch64/mpih-sub1.S gcrypt/mpi/aarch64/mpih-sub1.S
+--- gcrypt-orig/mpi/aarch64/mpih-sub1.S	2017-05-03 10:45:22.000000000 +0000
++++ gcrypt/mpi/aarch64/mpih-sub1.S	2017-12-16 21:10:36.548133390 +0000
+@@ -34,7 +34,9 @@
+ .text
+ 
+ .globl _gcry_mpih_sub_n
++#ifdef __ELF__
+ .type  _gcry_mpih_sub_n,%function
++#endif
+ _gcry_mpih_sub_n:
+ 	and	x5, x3, #3;
+ 	subs	xzr, xzr, xzr; /* prepare carry flag for sub */
+@@ -68,4 +70,6 @@
+ .Lend:
+ 	cset	x0, cc;
+ 	ret;
++#ifdef __ELF__
+ .size _gcry_mpih_sub_n,.-_gcry_mpih_sub_n;
++#endif

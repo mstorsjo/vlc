@@ -14,6 +14,7 @@ gcrypt: libgcrypt-$(GCRYPT_VERSION).tar.bz2 .sum-gcrypt
 	$(APPLY) $(SRC)/gcrypt/disable-tests-compilation.patch
 	$(APPLY) $(SRC)/gcrypt/fix-pthread-detection.patch
 	$(APPLY) $(SRC)/gcrypt/win64-arch.patch
+	$(APPLY) $(SRC)/gcrypt/aarch64-elf-asm.patch
 ifdef HAVE_WINSTORE
 	$(APPLY) $(SRC)/gcrypt/winrt.patch
 endif
@@ -38,9 +39,6 @@ GCRYPT_CONF = \
 ifdef HAVE_WIN32
 ifeq ($(ARCH),x86_64)
 GCRYPT_CONF += --disable-asm --disable-padlock-support
-endif
-ifeq ($(ARCH),aarch64)
-GCRYPT_CONF += --disable-asm
 endif
 endif
 ifdef HAVE_IOS
