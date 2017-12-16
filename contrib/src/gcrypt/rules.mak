@@ -39,6 +39,9 @@ ifdef HAVE_WIN32
 ifeq ($(ARCH),x86_64)
 GCRYPT_CONF += --disable-asm --disable-padlock-support
 endif
+ifeq ($(ARCH),aarch64)
+GCRYPT_CONF += --disable-asm
+endif
 endif
 ifdef HAVE_IOS
 GCRYPT_EXTRA_CFLAGS = -fheinous-gnu-extensions
