@@ -28,7 +28,9 @@
 
 	.align 2
 	.global merge8_arm64_neon
+#ifdef __ELF__
 	.type	merge8_arm64_neon, %function
+#endif
 	// NOTE: Offset and pitch must be multiple of 16-bytes in VLC.
 merge8_arm64_neon:
 	ands		x5, SIZE, #~63
@@ -67,7 +69,9 @@ merge8_arm64_neon:
 
 	.align 2
 	.global merge16_arm64_neon
+#ifdef __ELF__
 	.type	merge16_arm64_neon, %function
+#endif
 merge16_arm64_neon:
 	ands		x5, SIZE, #~63
 	b.eq		2f
