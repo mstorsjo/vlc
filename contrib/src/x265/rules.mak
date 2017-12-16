@@ -36,7 +36,7 @@ endif
 
 .x265: x265 toolchain.cmake
 	$(REQUIRE_GPL)
-	cd $</source && $(HOSTVARS_PIC) $(CMAKE) -DENABLE_SHARED=OFF
+	cd $</source && $(HOSTVARS_PIC) $(CMAKE) -DENABLE_SHARED=OFF -DCMAKE_SYSTEM_PROCESSOR=$(ARCH)
 	cd $</source && $(MAKE) install
 	sed -e s/'[^ ]*clang_rt[^ ]*'//g -i.orig "$(PREFIX)/lib/pkgconfig/x265.pc"
 	touch $@
