@@ -10,6 +10,14 @@ ifeq ($(call need_pkg,"mad"),)
 PKGS_FOUND += mad
 endif
 
+ifeq ($(ARCH),arm)
+ifdef HAVE_WIN32
+# The arm assembly in mad assumes building in arm mode, while windows on arm
+# is thumb only.
+MAD_CONF += --disable-aso
+endif
+endif
+
 $(TARBALLS)/libmad-$(MAD_VERSION).tar.gz:
 	$(call download,$(MAD_URL))
 
