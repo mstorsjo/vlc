@@ -1,0 +1,12 @@
+diff -urN gmp-orig/mpn/generic/div_qr_1n_pi1.c gmp/mpn/generic/div_qr_1n_pi1.c
+--- gmp-orig/mpn/generic/div_qr_1n_pi1.c	2017-12-19 10:52:24.676898300 +0000
++++ gmp/mpn/generic/div_qr_1n_pi1.c	2017-12-19 10:53:05.595992508 +0000
+@@ -49,7 +49,7 @@
+ 
+ /* FIXME: Duplicated in mod_1_1.c. Move to gmp-impl.h */
+ 
+-#if defined (__GNUC__)
++#if defined (__GNUC__) && !defined(NO_ASM)
+ 
+ #if HAVE_HOST_CPU_FAMILY_x86 && W_TYPE_SIZE == 32
+ #define add_mssaaaa(m, s1, s0, a1, a0, b1, b0)				\

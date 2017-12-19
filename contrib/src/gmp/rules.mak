@@ -24,6 +24,7 @@ gmp: gmp-$(GMP_VERSION).tar.bz2 .sum-gmp
 	$(APPLY) $(SRC)/gmp/thumb.patch
 	$(APPLY) $(SRC)/gmp/clang.patch
 	$(APPLY) $(SRC)/gmp/ppc64.patch
+	$(APPLY) $(SRC)/gmp/no-asm.patch
 	$(MOVE)
 
 # GMP requires either GPLv2 or LGPLv3
