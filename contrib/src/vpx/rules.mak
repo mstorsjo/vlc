@@ -66,6 +66,9 @@ else ifdef HAVE_WIN64 # must be before WIN32
 VPX_OS := win64
 else ifdef HAVE_WIN32
 VPX_OS := win32
+ifeq ($(ARCH),arm)
+VPX_ARCH :=
+endif
 else ifdef HAVE_BSD
 VPX_OS := linux
 endif
