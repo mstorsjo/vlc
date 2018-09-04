@@ -109,8 +109,17 @@ libqt_plugin_la_SOURCES = \
 	gui/qt/components/epg/EPGView.cpp gui/qt/components/epg/EPGView.hpp \
 	gui/qt/components/epg/EPGWidget.cpp \
 	gui/qt/components/epg/EPGWidget.hpp \
+	gui/qt/components/playlist/media.hpp \
+	gui/qt/components/playlist/playlist_common.cpp \
+	gui/qt/components/playlist/playlist_common.hpp \
+	gui/qt/components/playlist/playlist_controler.cpp \
+	gui/qt/components/playlist/playlist_controler.hpp \
+	gui/qt/components/playlist/playlist_controler_p.hpp \
 	gui/qt/components/playlist/playlist_item.cpp \
 	gui/qt/components/playlist/playlist_item.hpp \
+	gui/qt/components/playlist/playlist_model.cpp \
+	gui/qt/components/playlist/playlist_model.hpp \
+	gui/qt/components/playlist/playlist_model_p.hpp \
 	gui/qt/components/sout/profile_selector.cpp \
 	gui/qt/components/sout/profile_selector.hpp \
 	gui/qt/components/sout/sout_widgets.cpp \
@@ -213,7 +222,10 @@ nodist_libqt_plugin_la_SOURCES = \
 	gui/qt/components/epg/EPGRuler.moc.cpp \
 	gui/qt/components/epg/EPGView.moc.cpp \
 	gui/qt/components/epg/EPGWidget.moc.cpp \
+	gui/qt/components/playlist/playlist_common.moc.cpp \
+	gui/qt/components/playlist/playlist_item.moc.cpp \
 	gui/qt/components/playlist/playlist_model.moc.cpp \
+	gui/qt/components/playlist/playlist_controler.moc.cpp \
 	gui/qt/components/sout/profile_selector.moc.cpp \
 	gui/qt/components/sout/sout_widgets.moc.cpp \
 	gui/qt/util/animators.moc.cpp \
