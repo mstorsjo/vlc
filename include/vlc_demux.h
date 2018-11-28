@@ -55,6 +55,7 @@ typedef struct demux_meta_t
 {
     struct vlc_common_members obj;
     input_item_t *p_item; /***< the input item that is being read */
+    bool b_preparsing; /***< true if the item is being preparsed */
 
     vlc_meta_t *p_meta;                 /**< meta data */
 
