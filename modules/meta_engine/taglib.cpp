@@ -834,7 +834,13 @@ static int ReadMeta( vlc_object_t* p_this)
     if( unlikely(psz_uri == NULL) )
         return VLC_ENOMEM;
 
-#if VLC_WINSTORE_APP && TAGLIB_VERSION >= TAGLIB_VERSION_1_11
+#if TAGLIB_VERSION >= TAGLIB_VERSION_1_11
+#if !VLC_WINSTORE_APP
+    if ( p_demux_meta->b_preparsing )
+#else
+    if ( true )
+#endif
+    {
     stream_t *p_stream = vlc_access_NewMRL( p_this, psz_uri );
     free( psz_uri );
     if( p_stream == NULL )
@@ -842,7 +848,10 @@ static int ReadMeta( vlc_object_t* p_this)
 
     VlcIostream s( p_stream );
     f = FileRef( &s );
-#else /* VLC_WINSTORE_APP */
+    }
+    else
+#endif /* TAGLIB_VERSION >= TAGLIB_VERSION_1_11 */
+    {
     char *psz_path = vlc_uri2path( psz_uri );
     free( psz_uri );
     if( psz_path == NULL )
@@ -870,7 +879,7 @@ static int ReadMeta( vlc_object_t* p_this)
     f = FileRef( psz_path );
 #endif
     free( psz_path );
-#endif /* VLC_WINSTORE_APP */
+    }
 
     if( f.isNull() )
         return VLC_EGENERIC;
