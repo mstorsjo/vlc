@@ -40,7 +40,6 @@
 #include "../../video_filter/deinterlace/common.h"
 
 #ifdef __MINGW32__
-typedef UINT D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS;
 #define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND               0x1
 #define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB                 0x2
 #define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_ADAPTIVE            0x4
@@ -504,4 +503,3 @@ void D3D11CloseDeinterlace(vlc_object_t *obj)
 
     free(sys);
 }
-
