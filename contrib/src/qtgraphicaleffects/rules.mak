@@ -1,7 +1,8 @@
 # QtGraphicalEffects
 
-QTGE_VERSION := 5.11.0
-QTGE_URL := http://download.qt.io/official_releases/qt/5.11/$(QTGE_VERSION)/submodules/qtgraphicaleffects-everywhere-src-$(QTGE_VERSION).tar.xz
+QTGE_VERSION_MAJOR := 5.12
+QTGE_VERSION := $(QTGE_VERSION_MAJOR).0
+QTGE_URL := http://download.qt.io/official_releases/qt/$(QTGE_VERSION_MAJOR)/$(QTGE_VERSION)/submodules/qtgraphicaleffects-everywhere-src-$(QTGE_VERSION).tar.xz
 
 DEPS_qtgraphicaleffects += qtdeclarative $(DEPS_qtdeclarative)
 
@@ -35,5 +36,6 @@ qtgraphicaleffects: qtgraphicaleffects-$(QTGE_VERSION).tar.xz .sum-qtgraphicalef
 	rm -rf $(PREFIX)/qml
 	cd $(PREFIX)/lib/pkgconfig; sed -i.orig \
 		-e 's/ -lQt5QuickWidgets/ -lqtgraphicaleffectsplugin -lqtgraphicaleffectsprivate -lQt5QuickWidgets/' \
+		-e 's/-llibEGLd -llibGLESv2d/-llibEGL -llibGLESv2/' \
 		Qt5QuickWidgets.pc
 	touch $@

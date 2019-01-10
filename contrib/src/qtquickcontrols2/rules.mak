@@ -1,7 +1,8 @@
 # QtQuickControls 2
 
-QTQC2_VERSION := 5.11.0
-QTQC2_URL := http://download.qt.io/official_releases/qt/5.11/$(QTQC2_VERSION)/submodules/qtquickcontrols2-everywhere-src-$(QTQC2_VERSION).tar.xz
+QTQC2_VERSION_MAJOR := 5.12
+QTQC2_VERSION := $(QTQC2_VERSION_MAJOR).0
+QTQC2_URL := http://download.qt.io/official_releases/qt/$(QTQC2_VERSION_MAJOR)/$(QTQC2_VERSION)/submodules/qtquickcontrols2-everywhere-src-$(QTQC2_VERSION).tar.xz
 
 ifdef HAVE_WIN32
 ifeq ($(findstring $(ARCH), arm aarch64),)
@@ -38,7 +39,7 @@ qtquickcontrols2: qtquickcontrols2-$(QTQC2_VERSION).tar.xz .sum-qtquickcontrols2
 	cd $(PREFIX)/lib/pkgconfig; sed -i.orig \
 		-e 's/d\.a/.a/g' \
 		-e 's/-lQt\([^ ]*\)d/-lQt\1/g' \
-		-e 's/ -lQt5QuickControls2/ -lqtquickcontrolsplugin -lqtquickcontrols2plugin -lqtquicktemplates2plugin -lQt5QuickControls2/' \
+		-e 's/ -lQt5QuickControls2/ -lqtquickcontrols2plugin -lqtquicktemplates2plugin -lQt5QuickControls2/' \
+		-e 's/-llibEGLd -llibGLESv2d/-llibEGL -llibGLESv2/g' \
 		Qt5QuickControls2.pc
 	touch $@
-
