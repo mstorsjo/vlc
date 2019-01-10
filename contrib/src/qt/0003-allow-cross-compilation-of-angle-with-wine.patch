@@ -1,0 +1,55 @@
+From 1abb4d1ae6f125989fa5bcebf912b678f414fab9 Mon Sep 17 00:00:00 2001
+From: Pierre Lamot <pierre@videolabs.io>
+Date: Thu, 20 Dec 2018 17:42:12 +0100
+Subject: [PATCH] allow cross-compilation of angle with wine
+
+---
+ src/angle/src/common/common.pri | 17 ++---------------
+ src/gui/configure.json          |  2 +-
+ 2 files changed, 3 insertions(+), 16 deletions(-)
+
+diff --git a/src/angle/src/common/common.pri b/src/angle/src/common/common.pri
+index b64dbd3..a64b63b 100644
+--- a/src/angle/src/common/common.pri
++++ b/src/angle/src/common/common.pri
+@@ -22,21 +22,8 @@ lib_replace.replace = \$\$\$\$[QT_INSTALL_LIBS]
+ lib_replace.CONFIG = path
+ QMAKE_PRL_INSTALL_REPLACE += lib_replace
+ 
+-# DirectX is included in the Windows 8 Kit, but everything else requires the DX SDK.
+-winrt|msvc {
+-    FXC = fxc.exe
+-} else {
+-    DX_DIR = $$(DXSDK_DIR)
+-    isEmpty(DX_DIR) {
+-        error("Cannot determine DirectX SDK location. Please set DXSDK_DIR environment variable.")
+-    }
+-
+-    equals(QMAKE_TARGET.arch, x86_64) {
+-        FXC = \"$${DX_DIR}Utilities\\bin\\x64\\fxc.exe\"
+-    } else {
+-        FXC = \"$${DX_DIR}Utilities\\bin\\x86\\fxc.exe\"
+-    }
+-}
++# Use FXC through wine
++FXC = wine \"$$(DXSDK_DIR)/fxc2.exe\"
+
+ win32 {
+     VERSION = $$MODULE_VERSION
+diff --git a/src/gui/configure.json b/src/gui/configure.json
+index 0332631..73fd75c 100644
+--- a/src/gui/configure.json
++++ b/src/gui/configure.json
+@@ -667,7 +667,7 @@
+             "type": "directX",
+             "files": [
+                 "d3dcompiler.h",
+-                "d3d11.lib",
+-                "fxc.exe"
++                "libd3d11.a",
++                "fxc2.exe"
+             ]
+         },
+-- 
+2.19.1
+
