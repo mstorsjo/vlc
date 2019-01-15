@@ -420,9 +420,10 @@ static int Open( vlc_object_t *p_this, bool isDialogProvider )
 
     /* set up the playlist to work on */
     if( isDialogProvider )
-        p_sys->p_playlist = pl_Get( (intf_thread_t *)p_intf->obj.parent );
+        p_sys->p_playlist = vlc_intf_GetMainPlaylist( (intf_thread_t *)p_intf->obj.parent );
     else
-        p_sys->p_playlist = pl_Get( p_intf );
+        p_sys->p_playlist = vlc_intf_GetMainPlaylist( p_intf );
+    p_sys->p_player = vlc_playlist_GetPlayer( p_sys->p_playlist );
 
     /* */
     vlc_sem_init (&ready, 0);
@@ -589,13 +590,15 @@ static void *Thread( void *obj )
             known_type = false;
         }
 
-        var_Create( THEPL, "qt4-iface", VLC_VAR_ADDRESS );
-        var_Create( THEPL, "window", VLC_VAR_STRING );
+        var_Create( p_sys->p_player, "qt4-iface", VLC_VAR_ADDRESS );
+        var_Create( p_sys->p_player, "window", VLC_VAR_STRING );
+
 
         if( known_type )
         {
-            var_SetAddress( THEPL, "qt4-iface", p_intf );
-            var_SetString( THEPL, "window", "qt,any" );
+
+            var_SetAddress( p_sys->p_player, "qt4-iface", p_intf );
+            var_SetString( p_sys->p_player, "window", "qt,any" );
         }
     }
 
@@ -629,8 +632,8 @@ static void *Thread( void *obj )
     msg_Dbg( p_intf, "QApp exec() finished" );
     if (p_mi != NULL)
     {
-        var_Destroy( THEPL, "window" );
-        var_Destroy( THEPL, "qt4-iface" );
+        var_Destroy( p_sys->p_player, "window" );
+        var_Destroy( p_sys->p_player, "qt4-iface" );
 
         QMutexLocker locker (&lock);
         active = false;
