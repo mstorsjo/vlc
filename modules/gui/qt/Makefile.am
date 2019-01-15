@@ -146,6 +146,8 @@ libqt_plugin_la_SOURCES = \
 	gui/qt/util/singleton.hpp \
 	gui/qt/util/vlctick.cpp \
 	gui/qt/util/vlctick.hpp \
+	gui/qt/util/vlc_var_observer.cpp \
+	gui/qt/util/vlc_var_observer.hpp \
 	gui/qt/util/imagehelper.cpp gui/qt/util/imagehelper.hpp \
 	gui/qt/styles/seekstyle.cpp gui/qt/styles/seekstyle.hpp
 if HAVE_WIN32
@@ -232,6 +234,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	gui/qt/util/qmenuview.moc.cpp \
 	gui/qt/util/qvlcapp.moc.cpp \
 	gui/qt/util/pictureflow.moc.cpp \
+	gui/qt/util/vlc_var_observer.moc.cpp \
 	gui/qt/util/vlctick.moc.cpp \
 	gui/qt/util/validators.moc.cpp \
 	gui/qt/util/buttons/RoundButton.moc.cpp \
