@@ -51,10 +51,8 @@
 #define HAS_QT510 ( QT_VERSION >= 0x051000 )
 
 enum {
-    DialogEventTypeOffset = 0,
-    IMEventTypeOffset     = 100,
-    PLEventTypeOffset     = 200,
-    MsgEventTypeOffset    = 300,
+    IMEventTypeOffset     = 0,
+    MsgEventTypeOffset    = 100
 };
 
 enum{
@@ -63,6 +61,12 @@ enum{
     NOTIFICATION_ALWAYS = 2,
 };
 
+namespace vlc {
+namespace playlist {
+class PlaylistControlerModel;
+}
+}
+class PlayerControler;
 struct intf_sys_t
 {
     vlc_thread_t thread;
@@ -70,7 +74,6 @@ struct intf_sys_t
     class QVLCApp *p_app;          /* Main Qt Application */
     class MainInterface *p_mi;     /* Main Interface, NULL if DialogProvider Mode */
     class QSettings *mainSettings; /* Qt State settings not messing main VLC ones */
-    class PLModel *pl_model;
 
     QUrl filepath;        /* Last path used in dialogs */
 
@@ -78,6 +81,9 @@ struct intf_sys_t
     bool b_isDialogProvider; /* Qt mode or Skins mode */
     vlc_playlist_t *p_playlist;  /* playlist */
     vlc_player_t *p_player; /* player */
+
+    vlc::playlist::PlaylistControlerModel* p_mainPlaylistControler;
+    PlayerControler* p_mainPlayerControler;
 #ifdef _WIN32
     bool disable_volume_keys;
 #endif
@@ -131,8 +137,8 @@ struct vlc_player_locker {
 };
 
 #define THEDP DialogsProvider::getInstance()
-#define THEMIM MainInputManager::getInstance( p_intf )
-#define THEAM ActionsManager::getInstance( p_intf )
+#define THEMIM p_intf->p_sys->p_mainPlayerControler
+#define THEMPL p_intf->p_sys->p_mainPlaylistControler
 
 #define qfu( i ) QString::fromUtf8( i )
 #define qfue( i ) QString::fromUtf8( i ).replace( "&", "&&" ) /* for actions/buttons */

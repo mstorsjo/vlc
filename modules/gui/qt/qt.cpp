@@ -45,7 +45,8 @@ extern "C" char **environ;
 
 #include "qt.hpp"
 
-#include "input_manager.hpp"    /* THEMIM destruction */
+#include "components/player_controler.hpp"    /* THEMIM destruction */
+#include "components/playlist/playlist_controler.hpp" /* THEMPL creation */
 #include "dialogs_provider.hpp" /* THEDP creation */
 #ifdef _WIN32
 # include "main_interface_win32.hpp"
@@ -57,10 +58,9 @@ extern "C" char **environ;
 #include "dialogs/help.hpp"     /* Launch Update */
 #include "recents.hpp"          /* Recents Item destruction */
 #include "util/qvlcapp.hpp"     /* QVLCApplication definition */
-#include "components/playlist/playlist_model.hpp" /* for ~PLModel() */
 
 #include <QVector>
-#include "components/playlist_new/playlist_item.hpp"
+#include "components/playlist/playlist_item.hpp"
 
 #include <vlc_plugin.h>
 #include <vlc_vout_window.h>
@@ -439,7 +439,6 @@ static int Open( vlc_object_t *p_this, bool isDialogProvider )
     intf_sys_t *p_sys = p_intf->p_sys = new intf_sys_t;
     p_sys->b_isDialogProvider = isDialogProvider;
     p_sys->p_mi = NULL;
-    p_sys->pl_model = NULL;
 
     /* set up the playlist to work on */
     if( isDialogProvider )
@@ -488,13 +487,6 @@ static void Close( vlc_object_t *p_this )
 {
     intf_thread_t *p_intf = (intf_thread_t *)p_this;
     intf_sys_t *p_sys = p_intf->p_sys;
-
-    if( !p_sys->b_isDialogProvider )
-    {
-        playlist_t *pl = THEPL;
-
-        playlist_Deactivate (pl); /* release window provider if needed */
-    }
 
     /* And quit */
     msg_Dbg( p_this, "requesting exit..." );
@@ -591,8 +583,8 @@ static void *Thread( void *obj )
 
     /* Initialize the Dialog Provider and the Main Input Manager */
     DialogsProvider::getInstance( p_intf );
-    MainInputManager* mim = MainInputManager::getInstance( p_intf );
-    mim->probeCurrentInput();
+    p_sys->p_mainPlayerControler = new PlayerControler(p_intf);
+    p_sys->p_mainPlaylistControler = new vlc::playlist::PlaylistControlerModel(p_intf->p_sys->p_playlist);
 
 #ifdef UPDATE_CHECK
     /* Checking for VLC updates */
@@ -661,7 +653,10 @@ static void *Thread( void *obj )
 #ifdef Q_OS_MAC
     /* We took over main thread, register and start here */
     if( !p_sys->b_isDialogProvider )
-        playlist_Play( THEPL );
+    {
+        vlc_playlist_locker pllock{ THEPL };
+        vlc_playlist_Start( THEPL );
+    }
 #endif
 
     /* Last settings */
@@ -716,12 +711,10 @@ static void *Thread( void *obj )
     else
         getSettings()->remove( "filedialog-path" );
 
-    /* */
-    delete p_sys->pl_model;
-
-    /* Destroy the MainInputManager */
-    MainInputManager::killInstance();
-
+    /* Destroy the main playlist controler */
+    delete p_sys->p_mainPlaylistControler;
+    /* Destroy the main InputManager */
+    delete p_sys->p_mainPlayerControler;
     /* Delete the configuration. Application has to be deleted after that. */
     delete p_sys->mainSettings;
 
