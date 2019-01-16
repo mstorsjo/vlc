@@ -83,6 +83,7 @@ libqt_plugin_la_SOURCES = \
 	gui/qt/components/extended_panels.hpp \
 	gui/qt/components/info_panels.cpp gui/qt/components/info_panels.hpp \
 	gui/qt/components/info_widgets.cpp gui/qt/components/info_widgets.hpp \
+	gui/qt/components/player_controler.cpp gui/qt/components/player_controler.hpp gui/qt/components/player_controler_p.hpp \
 	gui/qt/components/preferences_widgets.cpp \
 	gui/qt/components/preferences_widgets.hpp \
 	gui/qt/components/complete_preferences.cpp \
@@ -206,6 +207,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	gui/qt/components/extended_panels.moc.cpp \
 	gui/qt/components/info_panels.moc.cpp \
 	gui/qt/components/info_widgets.moc.cpp \
+	gui/qt/components/player_controler.moc.cpp \
 	gui/qt/components/preferences_widgets.moc.cpp \
 	gui/qt/components/complete_preferences.moc.cpp \
 	gui/qt/components/simple_preferences.moc.cpp \
