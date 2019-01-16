@@ -47,7 +47,7 @@
 #include "components/extended_panels.hpp"
 #include "dialogs/preferences.hpp"
 #include "qt.hpp"
-#include "input_manager.hpp"
+#include "components/player_controler.hpp"
 #include "util/qt_dirs.hpp"
 #include "util/customwidgets.hpp"
 #include "dialogs_provider.hpp"
@@ -55,6 +55,7 @@
 #include "../../audio_filter/equalizer_presets.h"
 #include <vlc_modules.h>
 #include <vlc_plugin.h>
+#include <vlc_player.h>
 
 static bool filterIsPresent( const QString &filters, const QString &filter )
 {
@@ -111,7 +112,7 @@ static inline void setup_vfilter( intf_thread_t *p_intf, const char* psz_name, Q
     if( psz_filter_type == NULL )
         return;
 
-    char *psz_filters = var_InheritString( THEPL, psz_filter_type );
+    char *psz_filters = var_InheritString( p_intf, psz_filter_type );
     if( psz_filters == NULL )
         return;
 
@@ -270,14 +271,14 @@ void ExtVideo::cropChange()
     if( ui.leftRightCropSync->isChecked() )
         ui.cropRightPx->setValue( ui.cropLeftPx->value() );
 
-    QVector<vout_thread_t*> p_vouts = THEMIM->getVouts();
-    foreach( vout_thread_t *p_vout, p_vouts )
+    PlayerControler::VoutPtrList p_vouts = THEMIM->getVouts();
+    for( auto p_vout: p_vouts )
     {
-        var_SetInteger( p_vout, "crop-top", ui.cropTopPx->value() );
-        var_SetInteger( p_vout, "crop-bottom", ui.cropBotPx->value() );
-        var_SetInteger( p_vout, "crop-left", ui.cropLeftPx->value() );
-        var_SetInteger( p_vout, "crop-right", ui.cropRightPx->value() );
-        vlc_object_release( p_vout );
+        var_SetInteger( p_vout.get(), "crop-top", ui.cropTopPx->value() );
+        var_SetInteger( p_vout.get(), "crop-bottom", ui.cropBotPx->value() );
+        var_SetInteger( p_vout.get(), "crop-left", ui.cropLeftPx->value() );
+        var_SetInteger( p_vout.get(), "crop-right", ui.cropRightPx->value() );
+        vlc_object_release( p_vout.get() );
     }
 }
 
@@ -291,7 +292,7 @@ void ExtVideo::clean()
 
 static QString ChangeFiltersString( struct intf_thread_t *p_intf, const char *psz_filter_type, const char *psz_name, bool b_add )
 {
-    char* psz_chain = var_GetString( THEPL, psz_filter_type );
+    char* psz_chain = var_GetString( p_intf, psz_filter_type );
 
     QString const chain = QString( psz_chain ? psz_chain : "" );
     QStringList list = chain.split( ':', QString::SplitBehavior::SkipEmptyParts );
@@ -309,16 +310,15 @@ static QString ChangeFiltersString( struct intf_thread_t *p_intf, const char *ps
 static void UpdateVFiltersString( struct intf_thread_t *p_intf,
                                   const char *psz_filter_type, const char *value )
 {
-    var_SetString( THEPL, psz_filter_type, value );
+    var_SetString( p_intf, psz_filter_type, value );
 
     /* Try to set non splitter filters on the fly */
     if( strcmp( psz_filter_type, "video-splitter" ) )
     {
-        QVector<vout_thread_t*> p_vouts = THEMIM->getVouts();
-        foreach( vout_thread_t *p_vout, p_vouts )
+        PlayerControler::VoutPtrList p_vouts = THEMIM->getVouts();
+        for( auto p_vout: p_vouts )
         {
-            var_SetString( p_vout, psz_filter_type, value );
-            vlc_object_release( p_vout );
+            var_SetString( p_vout.get(), psz_filter_type, value );
         }
     }
 }
@@ -447,9 +447,9 @@ void ExtVideo::setWidgetValue( QObject *widget )
                      qtu( module ), qtu( option ), i_type );
             return;
     }
-    if( var_Create( THEPL, qtu( option ), i_type | VLC_VAR_DOINHERIT ) )
+    if( var_Create( p_intf, qtu( option ), i_type | VLC_VAR_DOINHERIT ) )
         return;
-    if( var_GetChecked( THEPL, qtu( option ), i_type, &val ) )
+    if( var_GetChecked( p_intf, qtu( option ), i_type, &val ) )
         return;
 
     /* Try to cast to all the widgets we're likely to encounter. Only
@@ -499,13 +499,13 @@ void ExtVideo::setWidgetValue( QObject *widget )
 void ExtVideo::setFilterOption( const char *psz_module, const char *psz_option,
         int i_int, double f_float, const char *psz_string )
 {
-    QVector<vout_thread_t*> p_vouts = THEMIM->getVouts();
+    PlayerControler::VoutPtrList p_vouts = THEMIM->getVouts();
     int i_type = 0;
     bool b_is_command = false;
 
     if( !p_vouts.isEmpty() )
     {
-        i_type = var_Type( p_vouts.at(0), psz_option );
+        i_type = var_Type( p_vouts.at(0).get(), psz_option );
         b_is_command = ( i_type & VLC_VAR_ISCOMMAND );
     }
     if( i_type == 0 )
@@ -519,18 +519,18 @@ void ExtVideo::setFilterOption( const char *psz_module, const char *psz_option,
         if( i_type == VLC_VAR_INTEGER )
         {
             val.i_int = i_int;
-            var_SetInteger( THEPL, psz_option, i_int );
+            var_SetInteger( p_intf, psz_option, i_int );
         }
         else
         {
-            var_SetBool( THEPL, psz_option, i_int );
+            var_SetBool( p_intf, psz_option, i_int );
             val.b_bool = i_int;
         }
     }
     else if( i_type == VLC_VAR_FLOAT )
     {
         emit configChanged( qfu( psz_option ), QVariant( f_float ) );
-        var_SetFloat( THEPL, psz_option, f_float );
+        var_SetFloat( p_intf, psz_option, f_float );
         val.f_float = f_float;
     }
     else if( i_type == VLC_VAR_STRING )
@@ -538,7 +538,7 @@ void ExtVideo::setFilterOption( const char *psz_module, const char *psz_option,
         if( psz_string == NULL )
             psz_string = "";
         emit configChanged( qfu( psz_option ), QVariant( psz_string ) );
-        var_SetString( THEPL, psz_option, psz_string );
+        var_SetString( p_intf, psz_option, psz_string );
         val.psz_string = (char *) psz_string;
     }
     else
@@ -553,19 +553,16 @@ void ExtVideo::setFilterOption( const char *psz_module, const char *psz_option,
 
     if( b_is_command )
     {
-        foreach( vout_thread_t *p_vout, p_vouts )
+        for( auto p_vout: p_vouts )
         {
-            var_SetChecked( p_vout, psz_option, i_type, val );
+            var_SetChecked( p_vout.get(), psz_option, i_type, val );
 #ifndef NDEBUG
-            int i_cur_type = var_Type( p_vout, psz_option );
+            int i_cur_type = var_Type( p_vout.get(), psz_option );
             assert( ( i_cur_type & VLC_VAR_CLASS ) == i_type );
             assert( !!( i_cur_type & VLC_VAR_ISCOMMAND ) == b_is_command );
 #endif
         }
     }
-
-    foreach( vout_thread_t *p_vout, p_vouts )
-        vlc_object_release( p_vout );
 }
 
 void ExtVideo::updateFilterOptions()
@@ -639,7 +636,7 @@ void ExtV4l2::showEvent( QShowEvent *event )
 
 void ExtV4l2::Refresh( void )
 {
-    vlc_object_t *p_obj = (vlc_object_t*)vlc_object_find_name( THEPL, "v4l2" );
+    vlc_object_t *p_obj = (vlc_object_t*)vlc_object_find_name( p_intf, "v4l2" );
     help->hide();
     if( box )
     {
@@ -800,7 +797,7 @@ void ExtV4l2::ValueChange( bool value )
 void ExtV4l2::ValueChange( int value )
 {
     QObject *s = sender();
-    vlc_object_t *p_obj = (vlc_object_t*)vlc_object_find_name( THEPL, "v4l2" );
+    vlc_object_t *p_obj = (vlc_object_t*)vlc_object_find_name( p_intf, "v4l2" );
     if( p_obj )
     {
         QString var = s->objectName();
@@ -875,23 +872,15 @@ void FilterSliderData::updateText( int i )
 
 float FilterSliderData::initialValue()
 {
-    vlc_object_t *p_aout = (vlc_object_t *) THEMIM->getAout();
+    PlayerControler::AoutPtr p_aout = THEMIM->getAout();
     float f = p_data->f_value;
     if( p_aout )
     {
-        if ( var_Type( p_aout, qtu(p_data->name) ) == 0 )
-        {
-            vlc_object_release( p_aout );
-            /* Not found, will try in config */
-        }
-        else
-        {
-            f = var_GetFloat( p_aout, qtu(p_data->name) );
-            vlc_object_release( p_aout );
-            return f;
-        }
+        if ( var_Type( p_aout.get(), qtu(p_data->name) ) != 0 )
+            return var_GetFloat( p_aout.get(), qtu(p_data->name) );
     }
 
+    //* Not found, will try in config */
     if ( ! config_FindConfig( qtu(p_data->name) ) )
         return f;
 
@@ -902,11 +891,10 @@ float FilterSliderData::initialValue()
 void FilterSliderData::onValueChanged( int i )
 {
     float f = ((float) i) * p_data->f_resolution;
-    vlc_object_t *p_aout = (vlc_object_t *) THEMIM->getAout();
+    PlayerControler::AoutPtr p_aout = THEMIM->getAout();
     if ( p_aout )
     {
-        var_SetFloat( p_aout, qtu(p_data->name), f );
-        vlc_object_release( p_aout );
+        var_SetFloat( p_aout.get(), qtu(p_data->name), f );
     }
     writeToConfig();
 }
@@ -962,7 +950,7 @@ void AudioFilterControlWidget::build()
         connectConfigChanged( filter );
     }
 
-    char *psz_af = var_InheritString( THEPL, "audio-filter" );
+    char *psz_af = var_InheritString( p_intf, "audio-filter" );
 
     if( psz_af && filterIsPresent( qfu(psz_af), name ) )
         slidersBox->setChecked( true );
@@ -985,7 +973,7 @@ void AudioFilterControlWidget::enable( bool b_enable )
     QString result = ChangeFiltersString( p_intf, "audio-filter", qtu(name),
                                           b_enable );
     emit configChanged( qfu("audio-filter"), result );
-    playlist_EnableAudioFilter( THEPL, qtu(name), b_enable );
+    vlc_player_aout_EnableFilter( p_intf->p_sys->p_player, qtu(name), b_enable );
 }
 
 /**********************************************************************
@@ -1014,20 +1002,19 @@ EqualizerSliderData::EqualizerSliderData( QObject *parent, intf_thread_t *_p_int
 
 QStringList EqualizerSliderData::getBandsFromAout() const
 {
-    vlc_object_t *p_aout = (vlc_object_t *) THEMIM->getAout();
+    PlayerControler::AoutPtr p_aout = THEMIM->getAout();
     QStringList bands;
     if( p_aout )
     {
-        if ( var_Type( p_aout, qtu(p_data->name) ) == VLC_VAR_STRING )
+        if ( var_Type( p_aout.get(), qtu(p_data->name) ) == VLC_VAR_STRING )
         {
-            char *psz_bands = var_GetString( p_aout, qtu(p_data->name) );
+            char *psz_bands = var_GetString( p_aout.get(), qtu(p_data->name) );
             if ( psz_bands )
             {
                 bands = QString( psz_bands ).split( " ", QString::SkipEmptyParts );
                 free( psz_bands );
             }
         }
-        vlc_object_release( p_aout );
     }
 
     if ( bands.count() ) return bands;
@@ -1064,11 +1051,10 @@ void EqualizerSliderData::onValueChanged( int i )
     {
         float f = ((float) i) * p_data->f_resolution;
         bands[ index ] = QLocale( QLocale::C ).toString( f );
-        vlc_object_t *p_aout = (vlc_object_t *) THEMIM->getAout();
+        PlayerControler::AoutPtr p_aout = THEMIM->getAout();
         if ( p_aout )
         {
-            var_SetString( p_aout, qtu(p_data->name), qtu(bands.join( " " )) );
-            vlc_object_release( p_aout );
+            var_SetString( p_aout.get(), qtu(p_data->name), qtu(bands.join( " " )) );
         }
         writeToConfig();
     }
@@ -1198,12 +1184,12 @@ void Equalizer::build()
     CONNECT( ui.presetsCombo, activated(int), this, setCorePreset(int) );
 
     /* Set enable checkbox */
-    vlc_object_t *p_aout = (vlc_object_t *)THEMIM->getAout();
+    PlayerControler::AoutPtr p_aout = THEMIM->getAout();
     char *psz_af;
     if( p_aout )
-        psz_af = var_GetNonEmptyString( p_aout, "audio-filter" );
+        psz_af = var_GetNonEmptyString( p_aout.get(), "audio-filter" );
     else
-        psz_af = var_InheritString( THEPL, "audio-filter" );
+        psz_af = var_InheritString( p_intf, "audio-filter" );
 
     /* To enable or disable subwidgets */
     /* If that list grows, better iterate over layout's childs */
@@ -1227,10 +1213,8 @@ void Equalizer::build()
     CONNECT( ui.enableCheck, toggled(bool), this, enable(bool) );
 
     /* Connect and set 2 Pass checkbox */
-    ui.eq2PassCheck->setChecked( var_InheritBool( p_aout, "equalizer-2pass" ) );
+    ui.eq2PassCheck->setChecked( var_InheritBool( p_aout.get(), "equalizer-2pass" ) );
     CONNECT( ui.eq2PassCheck, toggled(bool), this, enable2Pass(bool) );
-    if( p_aout )
-        vlc_object_release( p_aout );
 }
 
 void Equalizer::setCorePreset( int i_preset )
@@ -1245,11 +1229,10 @@ void Equalizer::setCorePreset( int i_preset )
                             sliderDatas.count() ) ; i++ )
         sliderDatas[i]->setValue( eqz_preset_10b[i_preset].f_amp[i] );
 
-    vlc_object_t *p_aout = (vlc_object_t *)THEMIM->getAout();
+    PlayerControler::AoutPtr p_aout = THEMIM->getAout();
     if( p_aout )
     {
-        var_SetString( p_aout , "equalizer-preset" , preset_list[i_preset] );
-        vlc_object_release( p_aout );
+        var_SetString( p_aout.get() , "equalizer-preset" , preset_list[i_preset] );
     }
     emit configChanged( qfu( "equalizer-preset" ), QVariant( qfu( preset_list[i_preset] ) ) );
 }
@@ -1257,12 +1240,11 @@ void Equalizer::setCorePreset( int i_preset )
 /* Function called when the set2Pass button is activated */
 void Equalizer::enable2Pass( bool b_enable )
 {
-    vlc_object_t *p_aout= (vlc_object_t *)THEMIM->getAout();
+    PlayerControler::AoutPtr p_aout= THEMIM->getAout();
 
     if( p_aout )
     {
-        var_SetBool( p_aout, "equalizer-2pass", b_enable );
-        vlc_object_release( p_aout );
+        var_SetBool( p_aout.get(), "equalizer-2pass", b_enable );
     }
     emit configChanged( qfu( "equalizer-2pass" ), QVariant( b_enable ) );
 }
@@ -1387,8 +1369,10 @@ void SyncWidget::setValue( double d )
     spinBox.setValue( d );
 }
 
-SyncControls::SyncControls( intf_thread_t *_p_intf, QWidget *_parent ) :
-                            QWidget( _parent ) , p_intf( _p_intf )
+SyncControls::SyncControls( intf_thread_t *_p_intf, QWidget *_parent )
+    : QWidget( _parent )
+    , p_intf( _p_intf )
+    , m_SubsDelayCfgFactor(VLC_OBJECT(p_intf), SUBSDELAY_CFG_FACTOR)
 {
     QGroupBox *AVBox, *subsBox;
     QToolButton *updateButton;
@@ -1454,14 +1438,24 @@ SyncControls::SyncControls( intf_thread_t *_p_intf, QWidget *_parent ) :
     mainLayout->addWidget( updateButton, 0, 4, 1, 1 );
 
     /* Various Connects */
-    CONNECT( AVSpin, valueChanged ( double ), this, advanceAudio( double ) ) ;
-    CONNECT( subsSpin, valueChanged ( double ), this, advanceSubs( double ) ) ;
-    CONNECT( subSpeedSpin, valueChanged ( double ),
-             this, adjustSubsSpeed( double ) );
-    CONNECT( subDurationSpin, valueChanged ( double ),
-             this, adjustSubsDuration( double ) );
+    connect( AVSpin, &SyncWidget::valueChanged, this, &SyncControls::advanceAudio ) ;
+    connect( subsSpin, &SyncWidget::valueChanged, this, &SyncControls::advanceSubs ) ;
+    connect( subSpeedSpin, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SyncControls::adjustSubsSpeed);
+    connect( subDurationSpin, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &SyncControls::adjustSubsDuration);
 
-    CONNECT( THEMIM->getIM(), synchroChanged(), this, update() );
+    connect( THEMIM, &PlayerControler::subtitleDelayChanged, [this](vlc_tick_t value) {
+        b_userAction = false;
+        subsSpin->setValue(secf_from_vlc_tick(value));
+        b_userAction = true;
+    });
+    connect( THEMIM, &PlayerControler::audioDelayChanged, [this](vlc_tick_t value) {
+        b_userAction = false;
+        AVSpin->setValue(secf_from_vlc_tick(value));
+        b_userAction = true;
+    });
+    connect( THEMIM, &PlayerControler::subtitleFPSChanged, subSpeedSpin, &QDoubleSpinBox::setValue );
+    connect( &m_SubsDelayCfgFactor, &VLCVarFloatObserver::valueChanged, subDurationSpin, &QDoubleSpinBox::setValue);
+
     BUTTON_SET_ACT_I( updateButton, "", update,
             qtr( "Force update of this dialog's values" ), update() );
 
@@ -1489,16 +1483,12 @@ void SyncControls::clean()
 void SyncControls::update()
 {
     b_userAction = false;
-
-    vlc_tick_t i_delay;
     if( THEMIM->getInput() )
     {
-        i_delay = var_GetInteger( THEMIM->getInput(), "audio-delay" );
-        AVSpin->setValue( secf_from_vlc_tick( i_delay ) );
-        i_delay = var_GetInteger( THEMIM->getInput(), "spu-delay" );
-        subsSpin->setValue( secf_from_vlc_tick( i_delay ) );
-        subSpeedSpin->setValue( var_GetFloat( THEMIM->getInput(), "sub-fps" ) );
-        subDurationSpin->setValue( var_InheritFloat( p_intf, SUBSDELAY_CFG_FACTOR ) );
+        subsSpin->setValue(secf_from_vlc_tick(THEMIM->getSubtitleDelay()));
+        AVSpin->setValue(secf_from_vlc_tick(THEMIM->getAudioDelay()));
+        subSpeedSpin->setValue(THEMIM->getSubtitleFPS());
+        subDurationSpin->setValue(m_SubsDelayCfgFactor.getValue());
     }
     b_userAction = true;
 }
@@ -1508,7 +1498,7 @@ void SyncControls::advanceAudio( double f_advance )
     if( THEMIM->getInput() && b_userAction )
     {
         vlc_tick_t i_delay = vlc_tick_from_sec( f_advance );
-        var_SetInteger( THEMIM->getInput(), "audio-delay", i_delay );
+        THEMIM->setAudioDelay( i_delay );
     }
 }
 
@@ -1517,16 +1507,14 @@ void SyncControls::advanceSubs( double f_advance )
     if( THEMIM->getInput() && b_userAction )
     {
         vlc_tick_t i_delay = vlc_tick_from_sec( f_advance );
-        var_SetInteger( THEMIM->getInput(), "spu-delay", i_delay );
+        THEMIM->setSubtitleDelay( i_delay );
     }
 }
 
 void SyncControls::adjustSubsSpeed( double f_fps )
 {
     if( THEMIM->getInput() && b_userAction )
-    {
-        var_SetFloat( THEMIM->getInput(), "sub-fps", f_fps );
-    }
+        THEMIM->setSubtitleFPS( f_fps );
 }
 
 void SyncControls::adjustSubsDuration( double f_factor )
@@ -1572,11 +1560,10 @@ void SyncControls::subsdelayClean()
 
 void SyncControls::subsdelaySetFactor( double f_factor )
 {
-    QVector<vout_thread_t*> p_vouts = THEMIM->getVouts();
-    foreach( vout_thread_t *p_vout, p_vouts )
+    PlayerControler::VoutPtrList p_vouts = THEMIM->getVouts();
+    for( auto p_vout: p_vouts )
     {
-        var_SetFloat( p_vout, SUBSDELAY_CFG_FACTOR, f_factor );
-        vlc_object_release( p_vout );
+        var_SetFloat( p_vout.get(), SUBSDELAY_CFG_FACTOR, f_factor );
     }
 }
 
