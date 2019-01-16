@@ -51,7 +51,6 @@ libqt_plugin_la_SOURCES = \
 	gui/qt/managers/addons_manager.cpp gui/qt/managers/addons_manager.hpp \
 	gui/qt/managers/renderer_manager.cpp gui/qt/managers/renderer_manager.hpp \
 	gui/qt/recents.cpp gui/qt/recents.hpp \
-	gui/qt/adapters/seekpoints.cpp gui/qt/adapters/seekpoints.hpp \
 	gui/qt/adapters/chromaprint.cpp gui/qt/adapters/chromaprint.hpp \
 	gui/qt/adapters/variables.cpp gui/qt/adapters/variables.hpp \
 	gui/qt/dialogs/bookmarks.cpp gui/qt/dialogs/bookmarks.hpp \
@@ -131,9 +130,7 @@ libqt_plugin_la_SOURCES = \
 	gui/qt/util/customwidgets.cpp gui/qt/util/customwidgets.hpp \
 	gui/qt/util/searchlineedit.cpp gui/qt/util/searchlineedit.hpp \
 	gui/qt/util/registry.cpp gui/qt/util/registry.hpp \
-	gui/qt/util/qmenuview.cpp gui/qt/util/qmenuview.hpp \
 	gui/qt/util/qt_dirs.cpp gui/qt/util/qt_dirs.hpp \
-	gui/qt/util/pictureflow.cpp gui/qt/util/pictureflow.hpp \
 	gui/qt/util/validators.cpp gui/qt/util/validators.hpp \
 	gui/qt/util/buttons/BrowseButton.cpp \
 	gui/qt/util/buttons/BrowseButton.hpp \
@@ -180,7 +177,6 @@ nodist_libqt_plugin_la_SOURCES = \
 	gui/qt/managers/addons_manager.moc.cpp \
 	gui/qt/managers/renderer_manager.moc.cpp \
 	gui/qt/recents.moc.cpp \
-	gui/qt/adapters/seekpoints.moc.cpp \
 	gui/qt/adapters/chromaprint.moc.cpp \
 	gui/qt/adapters/variables.moc.cpp \
 	gui/qt/dialogs/bookmarks.moc.cpp \
@@ -234,9 +230,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	gui/qt/util/customwidgets.moc.cpp \
 	gui/qt/util/qmleventfilter.moc.cpp \
 	gui/qt/util/searchlineedit.moc.cpp \
-	gui/qt/util/qmenuview.moc.cpp \
 	gui/qt/util/qvlcapp.moc.cpp \
-	gui/qt/util/pictureflow.moc.cpp \
 	gui/qt/util/vlc_var_observer.moc.cpp \
 	gui/qt/util/vlc_var_choice_model.moc.cpp \
 	gui/qt/util/vlctick.moc.cpp \
