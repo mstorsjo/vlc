@@ -30,6 +30,7 @@
 #include <vlc_extensions.h>
 
 #include "qt.hpp"
+#include <components/player_controler.hpp>
 
 #include <QObject>
 #include <QMenu>
@@ -78,7 +79,7 @@ public slots:
 private slots:
     void triggerMenu( int id );
     void inputChanged( );
-    void playingChanged( int );
+    void playingChanged(PlayerControler::PlayingState );
     void metaChanged( input_item_t *p_input );
 
 private:
