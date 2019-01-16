@@ -3808,6 +3808,10 @@ AS_IF([test "${enable_qt}" != "no"], [
     ])
 ])
 
+AC_ARG_ENABLE(qt-qml-debug,
+  [  --enable-qt-qml-debug   enable qml debuger])
+AM_CONDITIONAL(QT_QML_DEBUG, [test "${enable_qt_qml_debug}" = "yes"])
+
 AS_IF([test "${enable_qt}" != "no"], [
   ALIASES="${ALIASES} qvlc"
 ])
