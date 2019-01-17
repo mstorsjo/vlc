@@ -118,6 +118,12 @@ libqt_plugin_la_SOURCES = \
 	gui/qt/components/epg/EPGView.cpp gui/qt/components/epg/EPGView.hpp \
 	gui/qt/components/epg/EPGWidget.cpp \
 	gui/qt/components/epg/EPGWidget.hpp \
+	gui/qt/components/mediacenter/mcmedialib.cpp \
+	gui/qt/components/mediacenter/mcmedialib.hpp \
+	gui/qt/components/mediacenter/mlhelper.hpp \
+	gui/qt/components/mediacenter/mlqmltypes.hpp \
+	gui/qt/components/mediacenter/mlbasemodel.cpp \
+	gui/qt/components/mediacenter/mlbasemodel.hpp \
 	gui/qt/components/playlist/media.hpp \
 	gui/qt/components/playlist/playlist_common.cpp \
 	gui/qt/components/playlist/playlist_common.hpp \
@@ -238,6 +244,9 @@ nodist_libqt_plugin_la_SOURCES = \
 	gui/qt/components/epg/EPGRuler.moc.cpp \
 	gui/qt/components/epg/EPGView.moc.cpp \
 	gui/qt/components/epg/EPGWidget.moc.cpp \
+	gui/qt/components/mediacenter/mcmedialib.moc.cpp \
+	gui/qt/components/mediacenter/mlqmltypes.moc.cpp \
+	gui/qt/components/mediacenter/mlbasemodel.moc.cpp \
 	gui/qt/components/playlist/playlist_common.moc.cpp \
 	gui/qt/components/playlist/playlist_item.moc.cpp \
 	gui/qt/components/playlist/playlist_model.moc.cpp \
