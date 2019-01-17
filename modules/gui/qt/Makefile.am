@@ -60,7 +60,6 @@ libqt_plugin_la_SOURCES = \
 	gui/qt/dialogs/extended.cpp gui/qt/dialogs/extended.hpp \
 	gui/qt/dialogs/messages.cpp gui/qt/dialogs/messages.hpp \
 	gui/qt/dialogs/errors.cpp gui/qt/dialogs/errors.hpp \
-	gui/qt/dialogs/external.cpp gui/qt/dialogs/external.hpp \
 	gui/qt/dialogs/plugins.cpp gui/qt/dialogs/plugins.hpp \
 	gui/qt/dialogs/sout.cpp gui/qt/dialogs/sout.hpp \
 	gui/qt/dialogs/convert.cpp gui/qt/dialogs/convert.hpp \
@@ -185,7 +184,6 @@ nodist_libqt_plugin_la_SOURCES = \
 	gui/qt/dialogs/messages.moc.cpp \
 	gui/qt/dialogs/epg.moc.cpp \
 	gui/qt/dialogs/errors.moc.cpp \
-	gui/qt/dialogs/external.moc.cpp \
 	gui/qt/dialogs/plugins.moc.cpp \
 	gui/qt/dialogs/preferences.moc.cpp \
 	gui/qt/dialogs/sout.moc.cpp \
