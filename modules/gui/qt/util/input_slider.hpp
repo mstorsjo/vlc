@@ -41,7 +41,6 @@ class QMouseEvent;
 class QWheelEvent;
 class QHideEvent;
 class QTimer;
-class SeekPoints;
 class QPropertyAnimation;
 class QCommonStyle;
 class TimeTooltip;
@@ -57,7 +56,6 @@ public:
     SeekSlider( intf_thread_t *p_intf, Qt::Orientation q, QWidget *_parent = 0,
                 bool _classic = false );
     virtual ~SeekSlider();
-    void setChapters( SeekPoints * );
 
 protected:
     void mouseMoveEvent( QMouseEvent *event ) Q_DECL_OVERRIDE;
@@ -93,7 +91,7 @@ private:
     TimeTooltip *mTimeTooltip;
     float f_buffering;
     QTime bufferingStart;
-    SeekPoints* chapters;
+    QAbstractListModel* chapters;
     bool b_classic;
     bool b_seekable;
     int mHandleLength;
