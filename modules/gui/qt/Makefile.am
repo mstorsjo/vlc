@@ -140,6 +140,8 @@ libqt_plugin_la_SOURCES = \
 	gui/qt/components/mediacenter/mlgenre.hpp \
 	gui/qt/components/mediacenter/mlgenremodel.cpp \
 	gui/qt/components/mediacenter/mlgenremodel.hpp \
+	gui/qt/components/mediacenter/mlnetworkmodel.cpp \
+	gui/qt/components/mediacenter/mlnetworkmodel.hpp \
 	gui/qt/components/mediacenter/mlvideo.hpp \
 	gui/qt/components/mediacenter/mlvideo.cpp \
 	gui/qt/components/mediacenter/mlvideomodel.cpp \
@@ -275,6 +277,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	gui/qt/components/mediacenter/mlartistmodel.moc.cpp \
 	gui/qt/components/mediacenter/mlgenre.moc.cpp \
 	gui/qt/components/mediacenter/mlgenremodel.moc.cpp \
+	gui/qt/components/mediacenter/mlnetworkmodel.moc.cpp \
 	gui/qt/components/mediacenter/mlvideo.moc.cpp \
 	gui/qt/components/mediacenter/mlvideomodel.moc.cpp \
 	gui/qt/components/playlist/playlist_common.moc.cpp \
