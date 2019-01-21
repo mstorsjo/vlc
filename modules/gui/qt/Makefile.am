@@ -389,6 +389,7 @@ EXTRA_DIST += $(libqt_plugin_la_UI)
 # Resources
 
 libqt_plugin_la_RES = \
+	gui/qt/pixmaps/VLCIcons.ttf \
 	gui/qt/pixmaps/clear.svg \
 	gui/qt/pixmaps/eject.svg \
 	gui/qt/pixmaps/faster.svg \
@@ -520,7 +521,9 @@ libqt_plugin_la_RES = \
 	gui/qt/pixmaps/update.svg \
 	gui/qt/pixmaps/valid.svg \
 	gui/qt/pixmaps/search_clear.svg \
-	gui/qt/pixmaps/lock.svg
+	gui/qt/pixmaps/lock.svg \
+	gui/qt/qml/style/VLCIcons.qml \
+
 EXTRA_DIST += gui/qt/vlc.qrc $(libqt_plugin_la_RES)
 
 nodist_libqt_plugin_la_SOURCES += gui/qt/resources.cpp
