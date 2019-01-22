@@ -564,6 +564,7 @@ libqt_plugin_la_RES = \
 	gui/qt/qml/mediacenter/ArtistListView.qml \
 	gui/qt/qml/mediacenter/ArtistTopBanner.qml \
 	gui/qt/qml/mediacenter/MCMusicDisplay.qml \
+	gui/qt/qml/mediacenter/MCVideoDisplay.qml \
 	gui/qt/qml/mediacenter/MusicAlbumsDisplay.qml \
 	gui/qt/qml/mediacenter/MusicAlbumsGridExpandDelegate.qml \
 	gui/qt/qml/mediacenter/MusicArtistsDisplay.qml \
