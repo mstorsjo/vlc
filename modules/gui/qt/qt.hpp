@@ -67,6 +67,7 @@ class PlaylistControlerModel;
 }
 }
 class PlayerControler;
+class VideoRendererGL;
 struct intf_sys_t
 {
     vlc_thread_t thread;

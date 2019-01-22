@@ -508,6 +508,7 @@ static inline void qRegisterMetaTypes()
     // register all types used by signal/slots
     qRegisterMetaType<size_t>("size_t");
     qRegisterMetaType<ssize_t>("ssize_t");
+    qRegisterMetaType<vlc_tick_t>("vlc_tick_t");
 }
 
 static void *Thread( void *obj )
@@ -548,8 +549,14 @@ static void *Thread( void *obj )
     QApplication::setAttribute( Qt::AA_UseHighDpiPixmaps );
 #endif
 
+    // at the moment, the vout is created in another thread than the rendering thread
+    QApplication::setAttribute( Qt::AA_DontCheckOpenGLContextThreadAffinity );
+    QQuickWindow::setDefaultAlphaBuffer(true);
+
     /* Start the QApplication here */
     QVLCApp app( argc, argv );
+
+    //app.setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
 
     /* Set application direction to locale direction,
      * necessary for  RTL locales */
@@ -638,7 +645,6 @@ static void *Thread( void *obj )
 
         if( known_type )
         {
-
             var_SetAddress( p_sys->p_player, "qt4-iface", p_intf );
             var_SetString( p_sys->p_player, "window", "qt,any" );
         }
@@ -765,4 +771,5 @@ static int WindowOpen( vout_window_t *p_wnd )
     MainInterface *p_mi = p_intf->p_sys->p_mi;
 
     return p_mi->getVideo( p_wnd ) ? VLC_SUCCESS : VLC_EGENERIC;
+
 }
