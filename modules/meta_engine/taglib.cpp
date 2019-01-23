@@ -173,7 +173,7 @@ public:
 
     FileName name() const
     {
-        return m_stream->psz_location;
+        return m_stream->psz_uri;
     }
 
     ByteVector readBlock(ulong length)
@@ -841,7 +841,7 @@ static int ReadMeta( vlc_object_t* p_this)
     if ( true )
 #endif
     {
-    stream_t *p_stream = vlc_access_NewMRL( p_this, psz_uri );
+    stream_t *p_stream = vlc_stream_NewURL( p_this, psz_uri );
     free( psz_uri );
     if( p_stream == NULL )
         return VLC_EGENERIC;
