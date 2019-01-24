@@ -545,6 +545,16 @@ libqt_plugin_la_RES = \
 	gui/qt/qml/utils/SelectableDelegateModel.qml \
 	gui/qt/qml/utils/ComboBoxExt.qml \
 	gui/qt/qml/utils/StackViewExt.qml \
+	gui/qt/qml/menus/CheckableModelSubMenu.qml \
+	gui/qt/qml/menus/AudioMenu.qml \
+	gui/qt/qml/menus/HelpMenu.qml \
+	gui/qt/qml/menus/MainMenu.qml \
+	gui/qt/qml/menus/MediaMenu.qml \
+	gui/qt/qml/menus/PlaybackMenu.qml \
+	gui/qt/qml/menus/SubtitleMenu.qml \
+	gui/qt/qml/menus/ToolsMenu.qml \
+	gui/qt/qml/menus/ViewMenu.qml \
+	gui/qt/qml/menus/VideoMenu.qml \
 	gui/qt/qml/playlist/PlaylistListView.qml \
 	gui/qt/qml/playlist/PLItem.qml \
 	gui/qt/qml/playlist/PLItemFooter.qml \
