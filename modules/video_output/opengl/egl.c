@@ -185,7 +185,9 @@ static void Close(vlc_gl_t *gl)
             eglDestroyContext(sys->display, sys->context);
         if (sys->surface != EGL_NO_SURFACE)
             eglDestroySurface(sys->display, sys->surface);
-        eglTerminate(sys->display);
+        int64_t initialize_rc = var_DecInteger( gl, "egl-initialize-rc" );
+        if (initialize_rc == 0)
+            eglTerminate(sys->display);
     }
 #ifdef USE_PLATFORM_X11
     if (sys->x11 != NULL)
@@ -315,10 +317,16 @@ static int Open(vlc_gl_t *gl, const struct gl_api *api,
     if (sys->display == EGL_NO_DISPLAY)
         goto error;
 
+
+    var_Create(gl, "egl-initialize-rc" , VLC_VAR_INTEGER | VLC_VAR_DOINHERIT );
+    int64_t initialize_rc = var_IncInteger( gl, "egl-initialize-rc" );
     /* Initialize EGL display */
     EGLint major, minor;
-    if (eglInitialize(sys->display, &major, &minor) != EGL_TRUE)
-        goto error;
+    if (initialize_rc == 1) {
+        if (eglInitialize(sys->display, &major, &minor) != EGL_TRUE)
+            goto error;
+    }
+
     msg_Dbg(obj, "EGL version %s by %s",
             eglQueryString(sys->display, EGL_VERSION),
             eglQueryString(sys->display, EGL_VENDOR));
@@ -424,6 +432,7 @@ vlc_module_begin ()
     set_capability ("opengl", 50)
     set_callbacks (OpenGL, Close)
     add_shortcut ("egl")
+    add_integer("egl-initialize-rc", 0x0, NULL, NULL, true);
 
     add_submodule ()
     set_capability ("opengl es2", 50)
