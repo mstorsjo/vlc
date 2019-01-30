@@ -104,6 +104,8 @@ libqt_plugin_la_SOURCES = \
 	gui/qt/components/video_renderer/videorenderer.hpp \
 	gui/qt/components/video_renderer/videorendererdummy.cpp \
 	gui/qt/components/video_renderer/videorendererdummy.hpp \
+	gui/qt/components/video_renderer/videorenderergl.cpp \
+	gui/qt/components/video_renderer/videorenderergl.hpp \
 	gui/qt/components/custom_menus.cpp \
 	gui/qt/components/custom_menus.hpp \
 	gui/qt/components/epg/EPGChannels.cpp \
@@ -225,6 +227,7 @@ nodist_libqt_plugin_la_SOURCES = \
 	gui/qt/components/video_renderer/videosurface.moc.cpp \
 	gui/qt/components/video_renderer/videorenderer.moc.cpp \
 	gui/qt/components/video_renderer/videorendererdummy.moc.cpp \
+	gui/qt/components/video_renderer/videorenderergl.moc.cpp \
 	gui/qt/components/epg/EPGChannels.moc.cpp \
 	gui/qt/components/epg/EPGProgram.moc.cpp \
 	gui/qt/components/epg/EPGRuler.moc.cpp \

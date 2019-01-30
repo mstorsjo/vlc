@@ -12,7 +12,7 @@ class VideoRenderer : public QObject
     Q_OBJECT
 public:
     VideoRenderer(QObject* parent = nullptr);
-    virtual ~VideoRenderer() {}
+    virtual ~VideoRenderer();
 
     virtual void setupVoutWindow(vout_window_t* window);
     virtual void enableVideo(unsigned width, unsigned height, bool fullscreen);

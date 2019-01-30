@@ -5,6 +5,13 @@ VideoRenderer::VideoRenderer(QObject* parent)
 {
 }
 
+VideoRenderer::~VideoRenderer()
+{
+    QMutexLocker lock(&m_voutlock);
+    if (m_voutWindow)
+        vout_window_ReportClose(m_voutWindow);
+}
+
 void VideoRenderer::setupVoutWindow(vout_window_t* window)
 {
     QMutexLocker lock(&m_voutlock);
