@@ -47,7 +47,7 @@ qtdeclarative: qtdeclarative-$(QTDECLARATIVE_VERSION).tar.xz .sum-qtdeclarative
 	cp $(PREFIX)/qml/QtQml/Models.2/libmodelsplugin.a $(PREFIX)/lib/
 	rm -rf $(PREFIX)/qml
 	cd $(PREFIX)/lib/pkgconfig; for i in Qt5Quick.pc Qt5Qml.pc Qt5QuickWidgets.pc; do \
-		sed -i.orig -e 's/d\.a/.a/g' -e 's/-lQt\([^ ]*\)d[[:space:]]/-lQt\1/g' -e 's/-llibEGLd -llibGLESv2d/-llibEGL -llibGLESv2/' $$i; done
+		sed -i.orig -e 's/d\.a/.a/g' -e 's/-lQt\([^ ]*\)d[[:space:]]/-lQt\1 /g' -e 's/-llibEGLd -llibGLESv2d/-llibEGL -llibGLESv2 /' $$i; done
 	cd $(PREFIX)/lib/pkgconfig; sed -i.orig -e 's/ -lQt5Quick/ -lqtquick2plugin -lqquicklayoutsplugin -lwindowplugin -lQt5Quick/' Qt5Quick.pc
 	cd $(PREFIX)/lib/pkgconfig; sed -i.orig -e 's/ -lQt5Qml/ -lmodelsplugin -lQt5Qml/' Qt5Qml.pc
 
