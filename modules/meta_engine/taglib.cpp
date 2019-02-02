@@ -173,7 +173,7 @@ public:
 
     FileName name() const
     {
-        return m_stream->psz_uri;
+        return m_stream->psz_url;
     }
 
     ByteVector readBlock(ulong length)
