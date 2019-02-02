@@ -121,7 +121,7 @@ $(DST_DXGIDEBUG_H): $(TARBALLS)/dxgidebug.idl
 	mkdir -p -- "$(PREFIX)/include/"
 	$(WIDL) -DBOOL=WINBOOL -I$(PREFIX)/include $(IDL_INCLUDES) -h -o $@ $<
 
-$(DST_DXGITYPE_H): $(TARBALLS)/dxgitype.idl
+$(DST_DXGITYPE_H): $(TARBALLS)/dxgitype.idl $(TARBALLS)/dxgicommon.idl $(TARBALLS)/dxgiformat.idl
 	mkdir -p -- "$(PREFIX)/include/"
 	$(WIDL) -DBOOL=WINBOOL -I$(PREFIX)/include $(IDL_INCLUDES) -h -o $@ $<
 
@@ -137,7 +137,7 @@ $(DST_DXGI_H): $(TARBALLS)/dxgi.idl
 	mkdir -p -- "$(PREFIX)/include/"
 	$(WIDL) -DBOOL=WINBOOL -I$(PREFIX)/include $(IDL_INCLUDES) -h -o $@ $<
 
-$(DST_DXGI12_H): $(TARBALLS)/dxgi1_2.idl
+$(DST_DXGI12_H): $(TARBALLS)/dxgi1_2.idl $(TARBALLS)/dxgi.idl
 	mkdir -p -- "$(PREFIX)/include/"
 	$(WIDL) -DBOOL=WINBOOL -I$(PREFIX)/include -I$(IDL_INCLUDES) -h -o $@ $<
 

@@ -248,8 +248,7 @@ else
 download = $(error Neither curl nor wget found!)
 endif
 
-download_pkg = $(call download,$(CONTRIB_VIDEOLAN)/$(2)/$(lastword $(subst /, ,$(@)))) || \
-	( $(call download,$(1)) && echo "Please upload this package $(lastword $(subst /, ,$(@))) to our FTP" )
+download_pkg = ( $(call download,$(1)) && echo "Please upload this package $(lastword $(subst /, ,$(@))) to our FTP" )
 
 ifeq ($(shell which xz >/dev/null 2>&1 || echo FAIL),)
 XZ = xz
