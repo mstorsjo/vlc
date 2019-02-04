@@ -7,10 +7,7 @@ QTGE_URL := http://download.qt.io/official_releases/qt/$(QTGE_VERSION_MAJOR)/$(Q
 DEPS_qtgraphicaleffects += qtdeclarative $(DEPS_qtdeclarative)
 
 ifdef HAVE_WIN32
-ifeq ($(findstring $(ARCH), arm aarch64),)
-# There is no opengl available on windows on these architectures.
 PKGS += qtgraphicaleffects
-endif
 endif
 
 ifeq ($(call need_pkg,"Qt5QuickControls2"),)

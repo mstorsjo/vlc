@@ -50,12 +50,7 @@ endif
 
 
 ifdef HAVE_WIN32
-ifneq ($(findstring $(ARCH), arm aarch64),)
-# There is no opengl available on windows on these architectures.
-QT_OPENGL := -no-opengl
-else
 QT_OPENGL := -angle
-endif
 
 else
 QT_OPENGL := -opengl desktop
