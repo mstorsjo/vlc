@@ -22,6 +22,7 @@ $(TARBALLS)/qtdeclarative-$(QTDECLARATIVE_VERSION).tar.xz:
 qtdeclarative: qtdeclarative-$(QTDECLARATIVE_VERSION).tar.xz .sum-qtdeclarative
 	$(UNPACK)
 	mv qtdeclarative-everywhere-src-$(QTDECLARATIVE_VERSION) qtdeclarative-$(QTDECLARATIVE_VERSION)
+	$(APPLY) $(SRC)/qtdeclarative/disable-jit-armv7-win.patch
 	$(MOVE)
 
 .qtdeclarative: qtdeclarative
