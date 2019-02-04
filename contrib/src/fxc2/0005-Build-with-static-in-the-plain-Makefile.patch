@@ -1,0 +1,23 @@
+From c5fef77ac764218ce0171d441f5410033a6838af Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Storsj=C3=B6?= <martin@martin.st>
+Date: Mon, 4 Feb 2019 11:20:44 +0200
+Subject: [PATCH 5/5] Build with -static in the plain Makefile
+
+---
+ Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index c2f91c4..f99e104 100755
+--- a/Makefile
++++ b/Makefile
+@@ -1,4 +1,4 @@
+ x86 :
+-	i686-w64-mingw32-clang++ fxc2.cpp -ofxc2.exe
++	i686-w64-mingw32-clang++ -static fxc2.cpp -ofxc2.exe
+ x64 :
+-	x86_64-w64-mingw32-clang++ fxc2.cpp -ofxc2.exe
++	x86_64-w64-mingw32-clang++ -static fxc2.cpp -ofxc2.exe
+-- 
+2.7.4
+

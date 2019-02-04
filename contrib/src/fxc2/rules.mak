@@ -21,10 +21,10 @@ fxc2: fxc2-$(FXC2_VERSION).tar.xz .sum-fxc2
 	$(APPLY) $(SRC)/fxc2/0002-accept-windows-style-flags-and-splitted-argument-val.patch
 	$(APPLY) $(SRC)/fxc2/0003-Use-meson-as-a-build-system.patch
 	$(APPLY) $(SRC)/fxc2/0004-Revert-Fix-narrowing-conversion-from-int-to-BYTE.patch
+	$(APPLY) $(SRC)/fxc2/0005-Build-with-static-in-the-plain-Makefile.patch
 	$(MOVE)
 
-.fxc2: fxc2 crossfile.meson
+.fxc2: fxc2
 	cd $< && rm -rf ./build
-	cd $< && $(HOSTVARS_MESON) $(MESON) build
-	cd $< && cd build && ninja install
+	cd $< && make x64 && cp fxc2.exe dll/d3dcompiler_47.dll $(PREFIX)/bin
 	touch $@
