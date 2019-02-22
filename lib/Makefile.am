@@ -63,9 +63,14 @@ libvlc_la_LDFLAGS = \
 	-version-info 12:0:0 \
 	-export-symbols $(srcdir)/libvlc.sym
 libvlc_la_DEPENDENCIES = libvlc.sym
+libvlc_la_CFLAGS = $(AM_CFLAGS)
 if HAVE_WIN32
 libvlc_la_DEPENDENCIES += ../src/libvlc_win32_rc.$(OBJEXT)
 libvlc_la_LDFLAGS += -Wl,../src/libvlc_win32_rc.$(OBJEXT) -avoid-version -Wc,-static
+endif
+if HAVE_PDB
+libvlc_la_LDFLAGS += -Wl,-pdb,libvlc.pdb
+libvlc_la_CFLAGS  += -gcodeview
 endif
 if HAVE_OS2
 libvlc_la_LDFLAGS += -avoid-version

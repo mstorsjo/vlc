@@ -36,6 +36,11 @@ AM_LDFLAGS = \
 if HAVE_WIN32
 AM_LDFLAGS += $(top_builddir)/modules/module.rc.lo -Wc,-static
 endif
+if HAVE_PDB
+AM_LDFLAGS  += -Wl,-pdb,lib$(MODULE_STRING)_plugin.pdb
+AM_CFLAGS   += -gcodeview
+AM_CXXFLAGS += -gcodeview
+endif
 AM_YFLAGS = -d
 
 SUFFIXES = .l .y .asm

@@ -40,6 +40,10 @@ package-win-sdk: package-win-install
 package-win-common: package-win-install package-win-sdk
 # Executables, major libs
 	find $(prefix) -maxdepth 4 \( -name "*$(LIBEXT)" -o -name "*$(EXEEXT)" \) -exec cp {} "$(win32_destdir)/" \;
+# TODO: Only copy pdbs if pdbs are enabled
+	for dir in bin lib src; do \
+		cp $$dir/*.pdb $(win32_destdir); \
+	done
 
 # Text files, clean them from mail addresses
 	for file in AUTHORS THANKS ; \
@@ -54,7 +58,9 @@ package-win-common: package-win-install package-win-sdk
 		plugin_destdir="$(win32_destdir)/plugins/`basename $$plugindir`"; \
 		mkdir -p "$$plugin_destdir"; \
 		find "$$plugindir" -type f \( -not -name '*.la' -and -not -name '*.a' \) -exec cp -v "{}" "$$plugin_destdir" \; ;\
+		for plugin in $$(find "$$plugindir" -type f \( -not -name '*.la' -and -not -name '*.a' \)); do cp modules/$$(basename "$$plugin" | sed s/dll/pdb/) "$$plugin_destdir"; done; \
 	done
+# TODO: Only copy pdb above if pdbs are enabled
 	-cp -r $(prefix)/share/locale $(win32_destdir)
 
 # BD-J JAR

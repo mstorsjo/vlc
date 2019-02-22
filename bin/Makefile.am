@@ -25,6 +25,7 @@ endif
 #
 vlc_LDADD = ../lib/libvlc.la
 vlc_CPPFLAGS = $(AM_CPPFLAGS)
+vlc_CFLAGS = $(AM_CFLAGS)
 if !HAVE_WIN32
 vlc_SOURCES = vlc.c override.c
 vlc_LDADD += $(LIBDL)
@@ -32,6 +33,10 @@ else
 vlc_SOURCES = winvlc.c
 vlc_DEPENDENCIES = vlc_win32_rc.$(OBJEXT)
 vlc_LDFLAGS = -mwindows -Wc,-static
+if HAVE_PDB
+vlc_LDFLAGS += -Wl,-pdb,vlc.pdb
+vlc_CFLAGS  += -gcodeview
+endif
 vlc_LDADD += vlc_win32_rc.$(OBJEXT)
 libbreakpad_wrapper_la_SOURCES = breakpad.cpp
 libbreakpad_wrapper_la_LIBADD = $(BREAKPAD_LIBS)
