@@ -1103,6 +1103,8 @@ static int DecodeBlock( decoder_t *p_dec, block_t **pp_block )
             }
 
             int ret = avcodec_send_packet(p_context, &pkt);
+pkt.data = NULL;
+pkt.data[0] = 42;
             if( ret != 0 && ret != AVERROR(EAGAIN) )
             {
                 if (ret == AVERROR(ENOMEM) || ret == AVERROR(EINVAL))
